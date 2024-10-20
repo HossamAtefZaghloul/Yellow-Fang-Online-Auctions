@@ -1,6 +1,6 @@
 - 👋 Hi, I’m @HossamAtefZaghloul
 - 👀 I’m interested in Web-Development
-- 🌱 I’m currently learning WebDevelopment-FullStack  
+- 🌱 I’m currently learning WebDevelopment-FullStack MERN 
 
 <!---
 HossamAtefZaghloul/HossamAtefZaghloul is a ✨ special ✨ repository because its `README.md` (this file) appears on your GitHub profile.
