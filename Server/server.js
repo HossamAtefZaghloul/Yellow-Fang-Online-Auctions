@@ -7,9 +7,16 @@ import multer from 'multer';
 import fs from 'fs';
 import http from 'http'; 
 import { fileURLToPath } from 'url';
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import bcrypt from 'bcrypt';
 
 dotenv.config();
 
+//
+// const token = jwt.sign({ userId: 123 }, secret, { expiresIn: '1h' });
+const secret = process.env.SECRET_VALUE;
+//
 const PORT = process.env.PORT || 6001;
 const app = express();
 const server = http.createServer(app);
