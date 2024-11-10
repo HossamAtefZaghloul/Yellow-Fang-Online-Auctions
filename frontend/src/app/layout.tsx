@@ -1,13 +1,16 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import './globals.css'
 import Header from './components/Header'
 import Footer from './components/Footer'
-
-const inter = Inter({ subsets: ['latin'] })
+import { ThemeProvider } from 'next-themes';
+import { Inter } from 'next/font/google';
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Art Museum',
-  description: 'Upload and sell your paintings',
+  title: 'Mystery Museum',
+  description: 'Showcase of paintings and artifacts',
+  icons:"/1dsda.jpg"
+  
 }
 
 export default function RootLayout({
@@ -16,11 +19,19 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <Header />
-        <main>{children}</main>
-        <Footer />
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.className} min-h-screen flex flex-col`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+        >
+          <Header />
+          <main className="flex-grow">
+            {children}
+          </main>
+          <Footer />
+        </ThemeProvider>
       </body>
     </html>
   )
