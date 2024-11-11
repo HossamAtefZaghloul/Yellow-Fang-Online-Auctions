@@ -1,17 +1,17 @@
+// layout.tsx
 import type { Metadata } from 'next'
 import './globals.css'
-import Header from './components/Header'
-import Footer from './components/Footer'
 import { ThemeProvider } from 'next-themes';
 import { Inter } from 'next/font/google';
+import ClientLayout from './ClientLayout'; // Import the client component for header/footer logic
+
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Mystery Museum',
   description: 'Showcase of paintings and artifacts',
-  icons:"/1dsda.jpg"
-  
-}
+  icons: "/2.png",
+};
 
 export default function RootLayout({
   children,
@@ -21,18 +21,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} min-h-screen flex flex-col`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-        >
-          <Header />
-          <main className="flex-grow">
-            {children}
-          </main>
-          <Footer />
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <ClientLayout>{children}</ClientLayout>
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }
