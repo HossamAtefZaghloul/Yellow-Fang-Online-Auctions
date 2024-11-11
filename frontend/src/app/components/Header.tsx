@@ -1,7 +1,7 @@
 'use client'
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, LogIn } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Header() {
@@ -31,13 +31,19 @@ export default function Header() {
                 Artifacts
               </Link>
             </li>
-            <li>
+            <li >
+              <Link className='flex items-center gap-2' href="/login">
+                Signin
+                <LogIn className='h-5 w-5'  ></LogIn>
+              </Link>
+            </li>
+            <li className=''>
               <button
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                className="p-2 rounded-full hover:bg-accent"
+                className="rounded-full hover:bg-accent"
                 aria-label="Toggle theme"
               >
-                {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                {theme === 'dark' ? <Sun className="h-5 w-5 " /> : <Moon className="h-4 w-4" />}
               </button>
             </li>
           </ul>

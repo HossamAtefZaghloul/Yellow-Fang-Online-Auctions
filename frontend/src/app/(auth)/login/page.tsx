@@ -3,7 +3,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-
+import axios from 'axios'
 export default function LoginPage() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -12,29 +12,35 @@ export default function LoginPage() {
     const router = useRouter()
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        setIsLoading(true)
-        setError('')
-
+        e.preventDefault();
+        setIsLoading(true);
+        setError('');
+    
+        const formData = new FormData();
+        formData.append("email", email);
+        formData.append("password", password);
+    
         try {
-            // Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 1000))
-
-            // TODO: Implement actual login logic here
-            console.log({ email, password })
-
-            // Simulate successful login
-            router.push('/dashboard')
+            const res = await axios.post('/api/login', formData);
+    
+            await new Promise((resolve) => setTimeout(resolve, 500));
+    
+            if (res.status === 200) {
+                router.push('/'); 
+            } else {
+                await new Promise((resolve) => setTimeout(resolve, 500));
+                setError('Login failed. Please check your credentials and try again.');
+            }
         } catch (err) {
-            setError('An error occurred during login. Please try again.')
+            console.error('Login error:', err);
+            await new Promise((resolve) => setTimeout(resolve, 500));
+            setError('An error occurred during login. Please try again.');
         } finally {
-            setIsLoading(false)
+            setIsLoading(false); // Reset loading state
         }
-    }
+    };
 
     const handleGmailLogin = () => {
-        // TODO: Implement Gmail login logic
-        console.log('Gmail login clicked')
     }
 
     return (
@@ -59,7 +65,7 @@ export default function LoginPage() {
                 Back
             </Link>
 
-            <div className="  bg-white bg-transparent w-full max-w-md  rounded-lg shadow-md p-8">
+            <div className="bg-white w-full max-w-md  rounded-lg shadow-md p-8">
                 <div className="flex flex-col items-center mb-8">
 
                     <h1 className="flex justify-center items-center mr-[44px] text-[20px] font-bold text-[#d98a04] ">
