@@ -19,16 +19,12 @@ export default function LoginPage() {
         e.preventDefault();
         setIsLoading(true);
         setError('');
-
-        const formData = new FormData();
-        formData.append("email", email);
-        formData.append("password", password);
-
+    
         try {
-            const res = await axios.post('/api/login', formData);
-
+            const res = await axios.post('/api/login', { email, password });
+    
             await new Promise((resolve) => setTimeout(resolve, 500));
-
+    
             if (res.status === 200) {
                 router.push('/');
             } else {
@@ -40,7 +36,7 @@ export default function LoginPage() {
             await new Promise((resolve) => setTimeout(resolve, 500));
             setError('An error occurred during login. Please try again.');
         } finally {
-            setIsLoading(false); // Reset loading state
+            setIsLoading(false);
         }
     };
             // handleGmailLogin
