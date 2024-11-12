@@ -20,12 +20,8 @@ export default function LoginPage() {
         setIsLoading(true);
         setError('');
 
-        const formData = new FormData();
-        formData.append("email", email);
-        formData.append("password", password);
-
         try {
-            const res = await axios.post('/api/login', formData);
+            const res = await axios.post("/api/login", {email,password});
 
             await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -47,10 +43,6 @@ export default function LoginPage() {
             const handleGmailLogin = useGoogleLogin({
                 onSuccess: async (tokenResponse) => {
                     try {
-                        // const res = await axios.post('/api/google-login', {
-                        //     token: tokenResponse.access_token,
-                        // });
-            
                         // Fetch user info from Google (using tokenResponse.access_token)
                         const userInfoRes = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
                             headers: {
