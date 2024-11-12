@@ -21,7 +21,7 @@ export default function LoginPage() {
         setError('');
 
         try {
-            const res = await axios.post("/api/login", {email,password});
+            const res = await axios.post("/api/login", { email, password });
 
             await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -39,36 +39,39 @@ export default function LoginPage() {
             setIsLoading(false); // Reset loading state
         }
     };
-            // handleGmailLogin
-            const handleGmailLogin = useGoogleLogin({
-                onSuccess: async (tokenResponse) => {
-                    try {
-                        // Fetch user info from Google (using tokenResponse.access_token)
-                        const userInfoRes = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
-                            headers: {
-                                Authorization: `Bearer ${tokenResponse.access_token}`,
-                            },
-                        });
-            
-                        const { email, name } = userInfoRes.data;
-            
-                        const userRes = await axios.post('/api/login', { email, name });
-            
-                        if (userRes.status === 200) {
-                            router.push('/');
-                        } else {
-                            setError('Login failed. Please try again.');
-                        }
-                    } catch (err) {
-                        console.error('Google login error:', err);
-                        setError('An error occurred during Google login. Please try again.');
-                    }
-                },
-                onError: () => {
-                    setError('Google login failed. Please try again.');
-                },
-            });
-            
+    // handleGmailLogin
+    const handleGmailLogin = useGoogleLogin({
+        
+        onSuccess: async (tokenResponse) => {
+            try {
+                // Fetch user info from Google using tokenResponse.access_token
+                const userInfoRes = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+                    headers: {
+                        Authorization: `Bearer ${tokenResponse.access_token}`,
+                    },
+                });
+    
+                const { email, name } = userInfoRes.data;
+    
+                const userRes = await axios.post('/api/login', { email, name });
+    
+                if (userRes.status === 200) {
+                    router.push('/');
+                } else {
+                    setError('Login failed. Please try again.');
+                }
+            } catch (err) {
+                console.error('Google login error:', err);
+                setError('An error occurred during Google login. Please try again.');
+            }
+        },
+        onError: (error) => {
+            console.error('Google login error or user exited:', error);
+            setError('Google login was cancelled or failed. Please try again.');
+            setIsLoading(false); 
+        },
+    });
+
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center opacity-1  bg-[url('/123.jpg')] bg-cover">
@@ -167,7 +170,10 @@ export default function LoginPage() {
                     <div className="mt-6">
                         <button
                             type="button"
-                            onClick={handleGmailLogin}
+                            onClick={() => {
+                                setIsLoading(true);
+                                handleGmailLogin();
+                            }}
                             className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm  bg-transparent text-sm font-medium text-[#d98a04] hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-offset-2 focus:ring-[#d98a04]"
                         >
                             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">

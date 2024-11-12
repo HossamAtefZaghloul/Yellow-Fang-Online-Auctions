@@ -22,6 +22,11 @@ export default function Header() {
               </Link>
             </li>
             <li>
+              <Link href="/auctions" className={`${pathname === '/auctions' ? "active-link" : ""}`}>
+              Auctions
+              </Link>
+            </li>
+            <li>
               <Link href="/paintings" className={`${pathname === '/paintings' ? "active-link" : ""}`}>
                 Paintings
               </Link>

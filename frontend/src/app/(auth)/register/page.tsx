@@ -85,14 +85,14 @@ export default function LoginPage() {
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#d98a04] hover:bg-[#d98a04] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#d98a04] disabled:opacity-50"
+                        className="w-full flex justify-center  py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#d98a04] hover:bg-[#d98a04] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#d98a04] disabled:opacity-50"
                     >
                         {isLoading ? 'Signing Up...' : 'Sign Up'}
                     </button>
                 </form>
 
                 <div className="mt-6">
-                    <Link href="/login" className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-transparent text-sm font-medium text-[#d98a04] hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-offset-2 focus:ring-[#d98a04]">
+                    <Link href="/login" className="w-full inline-flex justify-center py-2 px-4 rounded-md text-[#d98a04] font-bold text-xs">
                         Log in
                     </Link>
                 </div>
