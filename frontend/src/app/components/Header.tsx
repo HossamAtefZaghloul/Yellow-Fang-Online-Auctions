@@ -39,7 +39,13 @@ export default function Header() {
             <li >
               <Link className='flex items-center gap-2' href="/login">
                 Signin
-                <LogIn className='h-5 w-5'  ></LogIn>
+                <LogIn onClick={()=>{
+                  localStorage.removeItem("token");
+                  document.cookie.split(";").forEach((cookie) => {
+                    const cookieName = cookie.split("=")[0].trim();
+                    document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                  });
+                }} className='h-5 w-5'  ></LogIn>
               </Link>
             </li>
             <li className=''>

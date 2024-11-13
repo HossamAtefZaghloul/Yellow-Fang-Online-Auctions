@@ -21,14 +21,15 @@ export const authenticateUser = async (email: string, password: string): Promise
     else {
 
         if (user && (await bcrypt.compare(password, user.password))) {
-            // console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+             console.log(user)
     
             const token = jwt.sign({ userId: user._id }, JWT_SECRET_KEY, { expiresIn: '1h' });
             console.log(token);
             return token;
         }
-        else {
-            console.log('!user!user!user!user!user!user!user!user!user!user!user!user')
+        else if (gmailUser) {
+            // console.log('!user!user!user!user!user!user!user!user!user!user!user!user')
+            
             const newUser =  new GmailUser({
                 email,
             });

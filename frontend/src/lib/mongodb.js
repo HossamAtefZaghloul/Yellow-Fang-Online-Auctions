@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-
+import 'dotenv/config'; 
 const MONGODB_URI = process.env.MONGO_URL;
 
 if (!MONGODB_URI) {
@@ -18,10 +18,7 @@ async function connectToDatabase() {
   }
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    }).then((mongoose) => {
+    cached.promise = mongoose.connect(MONGODB_URI).then((mongoose) => {
       return mongoose;
     });
   }
