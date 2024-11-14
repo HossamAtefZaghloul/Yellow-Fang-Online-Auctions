@@ -5,6 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useGoogleLogin } from "@react-oauth/google";
+import { useDispatch } from 'react-redux';
+import { setUser } from '../../store/authSlice';
+import { AppDispatch } from '../../store/index'
+import {jwtDecode} from "jwt-decode";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -12,6 +16,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
 
   // handleSubmit
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -27,20 +32,21 @@ export default function LoginPage() {
       if (res.status === 200) {
         const token = res.data.token;
 
-        document.cookie = `token=${token}; path=/; Secure; SameSite=Strict; max-age=3600`; // Expires in 1 hour
+        // const tokenData = jwtDecode(token);
+        // console.log(tokenData)
 
-        localStorage.setItem('token', token); // localStorage for client-side access
+        document.cookie = `token=${token}; path=/; Secure; SameSite=Strict; max-age=3600`;
 
-        setTimeout(() => {
-          router.push("/home"); // redirect to a protected page on successful login
-        }, );
+        localStorage.setItem('token', token);
+        router.push("/home");
+
       }
     } catch (err) {
       console.error("Login error:", err);
       await new Promise((resolve) => setTimeout(resolve, 500));
       setError("An error occurred during login. Please try again.");
     } finally {
-      setIsLoading(false); // Reset loading state
+      setIsLoading(false);
     }
   };
   // handleGmailLogin
@@ -64,13 +70,14 @@ export default function LoginPage() {
         if (userRes.status === 200) {
           const token = userRes.data.token;
 
+          // const tokenData = jwtDecode(token);
+          // console.log(tokenData)
+
           document.cookie = `token=${token}; path=/; Secure; SameSite=Strict; max-age=3600`; // Expires in 1 hour
 
-          localStorage.setItem('token', token); // localStorage for client-side access
-
-          setTimeout(() => {
-            router.push("/home"); // redirect to a protected page on successful login
-          }, );
+          localStorage.setItem('token', token);
+          
+            router.push("/home");
         } else {
           setError("Login failed. Please try again.");
         }

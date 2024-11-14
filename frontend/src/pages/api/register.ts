@@ -1,4 +1,3 @@
-// pages/api/register.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import connectToDatabase from '../../lib/mongodb';
 import User from '../../server/models/User';
@@ -12,26 +11,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         
         await connectToDatabase();
 
-        const { email, password } = req.body;
+        const { email, name, password } = req.body;
 
-        if (!email || !password) {
-            return res.status(400).json({ message: 'Email and password are required' });
+        if (!email || !password || !name) {
+            return res.status(400).json({ message: 'Email,Name and password are required' });
         }
 
-        // Check if the user already exists
         const checkEmail = await User.findOne({ email }); 
         if (checkEmail) {
             return res.status(400).json({ message: 'Email already exists.' });
         }
 
-        // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create a new user
         const newUser = new User({
             email,
+            name,
             password: hashedPassword,
+            
         });
+        console.log(newUser)
 
         await newUser.save(); 
         return res.status(201).json({ message: 'User created successfully.' });

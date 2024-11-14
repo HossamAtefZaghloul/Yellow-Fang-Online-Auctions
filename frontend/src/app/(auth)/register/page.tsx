@@ -7,20 +7,20 @@ import axios from 'axios'
 
 export default function LoginPage() {
     const [email, setEmail] = useState('')
+    const [name, setName] = useState('')
     const [password, setPassword] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
     const router = useRouter()
-
+    
     // handleSubmit
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsLoading(true);
         setError('');
-        console.log(email);
-        console.log(password);
+
         try {
-            const res = await axios.post("/api/register", { email, password })
+            const res = await axios.post("/api/register", {email, name, password})
 
             if (res.status === 201) {
                 router.push('/login')
@@ -66,7 +66,18 @@ export default function LoginPage() {
                             onChange={(e) => setEmail(e.target.value)}
                         />
                     </div>
-
+                    <div>
+                        <label htmlFor="Name" className="block text-sm font-medium text-[#d98a04]">User Name</label>
+                        <input
+                            id="name"
+                            type="name"
+                            required
+                            className="mt-1 block w-full px-3 py-2 border text-[#ca8a04] bg-transparent border-[#ffbf50] rounded-md shadow-sm focus:outline-none focus:ring-white focus:border-[#d98a04]"
+                            placeholder="Name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                        />
+                    </div>
                     <div>
                         <label htmlFor="password" className="block text-sm font-medium text-[#d98a04]">Password</label>
                         <input

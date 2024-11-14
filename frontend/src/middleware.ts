@@ -6,8 +6,8 @@ import type { NextRequest } from 'next/server';
 export function middleware(req: NextRequest) {
 
   const token: string | null = req.cookies.get('token')?.value ?? null;
-  console.log(token)
-  console.log("dddddddddddddddddddddddddddddsdsfdfhdsfhjdsjhjhhhjdhdihaskdhaskdhkasj")
+  // console.log(token)
+  // console.log("dddddddddddddddddddddddddddddsdsfdfhdsfhjdsjhjhhhjdhdihaskdhaskdhkasj")
 
   //protected paths
   const protectedPaths = ['/home', '/'];

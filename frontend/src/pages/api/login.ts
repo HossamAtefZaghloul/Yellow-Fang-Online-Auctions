@@ -7,19 +7,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 return res.status(405).json({ message: 'Method Not Allowed' });
             }
 
-            const { email, password } = req.body;
+            const { email, password, name} = req.body;
 
             if (email && password) {
-                const token = await authenticateUser(email, password); 
+                const token = await authenticateUser(email, password, name); 
                 if (token) {
-                    return res.status(200).json({ message: 'Login successful', token });
+                    return res.status(200).json({ message: 'Login successful', token});
                 } else {
                     return res.status(401).json({ message: 'Invalid credentials' });
                 }
             }
             else if (email) {
                 // console.log('emailemailemailemailemailemail')
-                const token = await authenticateUser(email, password); 
+                const token = await authenticateUser(email, password, name); 
                 if (token) {
                     return res.status(200).json({ message: 'Login successful', token });
                 } else {
