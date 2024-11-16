@@ -7,6 +7,7 @@ interface IArtifact extends Document {
   startingPrice: number;
   auctionStartDate?: Date;
   auctionEndDate: Date;
+  sold : boolean;
 }
 
 const artifactSchema = new Schema<IArtifact>({
@@ -37,6 +38,9 @@ const artifactSchema = new Schema<IArtifact>({
     type: Date,
     required: true
   },
+  sold: {
+    type: Boolean,
+  }
 });
 
 const Artifact = model<IArtifact>('Artifact', artifactSchema);

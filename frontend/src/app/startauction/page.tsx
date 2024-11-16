@@ -3,41 +3,9 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Upload, DollarSign, Calendar, FileText, ImageIcon } from 'lucide-react'
+import { uploadItem } from './uploadItem';
+import Image from 'next/image';
 
-async function uploadItem(formData: FormData) {
-  const file = formData.get('image') as File
-  const name = formData.get('name') as string
-  const description = formData.get('description') as string
-  const startingPrice = formData.get('startingPrice') as string
-  const auctionStartDate = formData.get('auctionStartDate') as string
-
-
-
-  if (!file || !name || !description || !startingPrice || !auctionStartDate) {
-    return { error: 'All fields are required' }
-  }
-
-  try {
-    // Simulate image upload
-    const imageUrl = URL.createObjectURL(file)
-
-    // Here you would typically save the item details to your database
-    // For this example, we'll just return the data
-    return { 
-      success: true, 
-      data: { 
-        imageUrl, 
-        name, 
-        description, 
-        startingPrice, 
-        auctionStartDate 
-      } 
-    }
-  } catch (error) {
-    console.error('Error uploading file:', error)
-    return { error: 'Failed to upload file' }
-  }
-}
 
 export default function AuctionItemUpload() {
   const [isUploading, setIsUploading] = useState(false)
@@ -57,10 +25,10 @@ export default function AuctionItemUpload() {
     setIsUploading(true)
     const result = await uploadItem(formData)
     setIsUploading(false)
-
     if (result.error) {
       alert(result.error)
     } else {
+      console.log(formData)
       alert('Item uploaded successfully')
     }
   }
@@ -87,7 +55,7 @@ export default function AuctionItemUpload() {
         </div>
         {imagePreview && (
           <div className="w-full my-4 flex justify-center ">
-            <img
+            <Image 
               src={imagePreview}
               alt="Preview"
               className="h-[200px] rounded"
@@ -132,7 +100,7 @@ export default function AuctionItemUpload() {
           />
         </div>
         <div>
-          <label htmlFor="auctionStartDate" className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+          <label htmlFor="auctionStartDate" className="text-sm font-medium text-gray-700 mb-1 flex items-center">
             <Calendar className="mr-2" size={18} /> Auction Start Date
           </label>
           <input

@@ -9,7 +9,7 @@ export default function Header() {
   const { theme, setTheme } = useTheme();
   const pathname = usePathname();
   const { userId, email, isAdmin } = useSelector((state: RootState) => state.auth);
-  let userName = email && email;
+  const userName = email && email;
 
 
   return (
