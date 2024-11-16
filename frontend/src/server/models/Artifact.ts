@@ -36,7 +36,7 @@ const artifactSchema = new Schema<IArtifact>({
   auctionEndDate: {
     type: Date,
     required: true
-  }
+  },
 });
 
 const Artifact = model<IArtifact>('Artifact', artifactSchema);

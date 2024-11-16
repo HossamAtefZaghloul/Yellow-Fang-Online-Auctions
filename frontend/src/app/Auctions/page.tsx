@@ -1,4 +1,5 @@
-import NavItem from "../components/NavItem"
+import NavItem from "../components/NavItem";
+
 
 export default function Component() {
 

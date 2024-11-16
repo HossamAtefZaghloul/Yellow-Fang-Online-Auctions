@@ -2,22 +2,16 @@ import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import { Moon, Sun, LogIn } from "lucide-react";
 import Link from "next/link";
-import Cookies from "js-cookie";
-import { jwtDecode } from "jwt-decode";
+import { useSelector } from 'react-redux';
+import { RootState } from '../store';
 
 export default function Header() {
   const { theme, setTheme } = useTheme();
   const pathname = usePathname();
-  const token: string | null = Cookies.get("token") ?? null;
-  let userName: string | null = null;
-  
-  // Check if token is a valid string before decoding
-  if (token) {
-    const decoded = jwtDecode(token);
-    userName = decoded ? decoded.name : "Signin";
-  } else {
-    userName = "Signin"; // Fallback if token is null
-  }
+  const { userId, email, isAdmin } = useSelector((state: RootState) => state.auth);
+  let userName = email && email;
+
+
   return (
     <header className="bg-background text-foreground shadow-md">
       <div className="font-custom container mx-auto px-4 py-6 flex justify-between items-center">

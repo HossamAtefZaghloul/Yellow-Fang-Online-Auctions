@@ -5,10 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useGoogleLogin } from "@react-oauth/google";
-import { useDispatch } from 'react-redux';
-import { setUser } from '../../store/authSlice';
-import { AppDispatch } from '../../store/index'
-import {jwtDecode} from "jwt-decode";
+import { useDispatch } from "react-redux";
+import { setUser } from "../../store/authSlice";
+import { AppDispatch } from "../../store";
+import { jwtDecode } from "jwt-decode";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -27,19 +27,22 @@ export default function LoginPage() {
     try {
       const res = await axios.post("/api/login", { email, password });
 
+      // Simulate server delay (optional)
       await new Promise((resolve) => setTimeout(resolve, 500));
-
+  
       if (res.status === 200) {
         const token = res.data.token;
-
-        // const tokenData = jwtDecode(token);
-        // console.log(tokenData)
-
+        localStorage.setItem("token", token);
         document.cookie = `token=${token}; path=/; Secure; SameSite=Strict; max-age=3600`;
-
-        localStorage.setItem('token', token);
-        router.push("/home");
-
+        const tokenData = jwtDecode(token);
+        if (tokenData) {
+          dispatch(setUser({ 
+            userId: tokenData.userId, 
+            email: tokenData.email, 
+            isAdmin: tokenData.role || false 
+          }));
+        }
+        router.push("/");
       }
     } catch (err) {
       console.error("Login error:", err);
@@ -69,15 +72,17 @@ export default function LoginPage() {
 
         if (userRes.status === 200) {
           const token = userRes.data.token;
-
-          // const tokenData = jwtDecode(token);
-          // console.log(tokenData)
-
           document.cookie = `token=${token}; path=/; Secure; SameSite=Strict; max-age=3600`; // Expires in 1 hour
-
-          localStorage.setItem('token', token);
-          
-            router.push("/home");
+          localStorage.setItem("token", token);
+          const tokenData = jwtDecode(token);
+          if (tokenData) {
+            dispatch(setUser({ 
+              userId: tokenData.userId, 
+              email: tokenData.email, 
+              isAdmin: tokenData.role || false 
+            }));
+          }
+          router.push("/");
         } else {
           setError("Login failed. Please try again.");
         }

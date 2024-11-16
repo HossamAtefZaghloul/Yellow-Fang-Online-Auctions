@@ -1,25 +1,39 @@
-'use client'
+"use client";
 
-import React, { useState } from 'react'
-import { ChevronDown, Menu, X } from 'lucide-react'
+import React, { useState } from "react";
+import { ChevronDown, Menu, X } from "lucide-react";
+import { Gavel } from "lucide-react";
+import Link from "next/link";
 
 type NavItem = {
-  title: string
-  items: string[]
-}
+  title: string;
+  items: string[];
+};
 
 const navItems: NavItem[] = [
-  { title: 'Jewelry', items: ['Necklaces', 'Rings', 'Earrings', 'Bracelets'] },
-  { title: 'Collectibles', items: ['Coins', 'Stamps', 'Trading Cards', 'Figurines'] },
-  { title: 'Furniture', items: ['Chairs', 'Tables', 'Sofas', 'Cabinets'] },
-  { title: 'Asian Art', items: ['Paintings', 'Sculptures', 'Ceramics', 'Textiles'] },
-  { title: 'Watches', items: ['Luxury', 'Vintage', 'Smart Watches', 'Accessories'] },
-  { title: 'Books', items: ['Fiction', 'Non-Fiction', 'Rare Books', 'Manuscripts'] },
-]
+  { title: "Jewelry", items: ["Necklaces", "Rings", "Earrings", "Bracelets"] },
+  {
+    title: "Collectibles",
+    items: ["Coins", "Stamps", "Trading Cards", "Figurines"],
+  },
+  { title: "Furniture", items: ["Chairs", "Tables", "Sofas", "Cabinets"] },
+  {
+    title: "Asian Art",
+    items: ["Paintings", "Sculptures", "Ceramics", "Textiles"],
+  },
+  {
+    title: "Watches",
+    items: ["Luxury", "Vintage", "Smart Watches", "Accessories"],
+  },
+  {
+    title: "Books",
+    items: ["Fiction", "Non-Fiction", "Rare Books", "Manuscripts"],
+  },
+];
 
 export default function Component() {
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <nav className="w-full border-t-2 border-b-2 p-2">
@@ -29,7 +43,11 @@ export default function Component() {
           className="p-2 text-gray-500 hover:text-gray-600"
           aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
         >
-          {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          {isMobileMenuOpen ? (
+            <X className="h-6 w-6" />
+          ) : (
+            <Menu className="h-6 w-6" />
+          )}
         </button>
       </div>
 
@@ -38,18 +56,27 @@ export default function Component() {
           {navItems.map((item, index) => (
             <li key={item.title}>
               <button
-                onClick={() => setHoveredIndex(hoveredIndex === index ? null : index)}
+                onClick={() =>
+                  setHoveredIndex(hoveredIndex === index ? null : index)
+                }
                 className="flex w-full items-center justify-between p-2 text-left"
                 aria-expanded={hoveredIndex === index}
               >
                 {item.title}
-                <ChevronDown className={`h-4 w-4 transition-transform ${hoveredIndex === index ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${
+                    hoveredIndex === index ? "rotate-180" : ""
+                  }`}
+                />
               </button>
               {hoveredIndex === index && (
                 <ul className="ml-4 mt-2 space-y-2">
                   {item.items.map((subItem) => (
                     <li key={subItem}>
-                      <a href="#" className="block p-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">
+                      <a
+                        href="#"
+                        className="block p-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                      >
                         {subItem}
                       </a>
                     </li>
@@ -58,11 +85,15 @@ export default function Component() {
               )}
             </li>
           ))}
+          <Link href="/startauction" className="flex items-center">
+            <Gavel />
+            Start Auction
+          </Link>
         </ul>
       )}
 
       {/* Desktop Menu */}
-      <ul className="hidden md:flex w-full justify-center items-center gap-4">  
+      <ul className="hidden md:flex w-full justify-center items-center gap-4">
         {navItems.map((item, index) => (
           <li
             key={item.title}
@@ -97,7 +128,11 @@ export default function Component() {
             )}
           </li>
         ))}
+        <Link href="/startauction" className="flex items-center">
+          <Gavel />
+          Start Auction
+        </Link>
       </ul>
     </nav>
-  )
+  );
 }
