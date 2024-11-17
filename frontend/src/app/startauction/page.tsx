@@ -1,35 +1,45 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { Upload, DollarSign, Calendar, FileText, ImageIcon } from 'lucide-react'
-import { uploadItem } from './uploadItem';
-import Image from 'next/image';
-
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Upload,
+  DollarSign,
+  Calendar,
+  FileText,
+  ImageIcon,
+} from "lucide-react";
+import { uploadItem } from "./uploadItem";
+import Image from "next/image";
 
 export default function AuctionItemUpload() {
-  const [isUploading, setIsUploading] = useState(false)
-  const router = useRouter()
-  const [imagePreview, setImagePreview] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const router = useRouter();
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       const imagePreviewUrl = URL.createObjectURL(file);
       setImagePreview(imagePreviewUrl);
     }
   };
 
-  async function handleSubmit(formData: FormData) {
-    setIsUploading(true)
-    const result = await uploadItem(formData)
-    setIsUploading(false)
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault(); 
+
+    const form = e.target as HTMLFormElement;
+    const formData = new FormData(form);
+
+    setIsUploading(true);
+    const result = await uploadItem(formData);
+    setIsUploading(false);
+
     if (result.error) {
-      alert(result.error)
+      console.log('Upload failed:', result.error);
     } else {
-      console.log(formData)
-      alert('Item uploaded successfully')
+      console.log("Item uploaded successfully:", result.data);
+      router.push("/auctions");
     }
   }
 
@@ -38,15 +48,18 @@ export default function AuctionItemUpload() {
       <h1 className="text-2xl font-bold mb-6 flex items-center">
         <Upload className="mr-2" /> Upload Auction Item
       </h1>
-      <form action={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="image" className=" text-sm font-medium text-gray-700 mb-1 flex items-center">
+          <label
+            htmlFor="image"
+            className="text-sm font-medium text-gray-700 mb-1 flex items-center"
+          >
             <ImageIcon className="mr-2" size={18} /> Image
           </label>
           <input
-          onChange={handleImageChange}
+            onChange={handleImageChange}
             id="image"
-            name="image"
+            name="file"
             type="file"
             accept="image/*"
             required
@@ -54,16 +67,20 @@ export default function AuctionItemUpload() {
           />
         </div>
         {imagePreview && (
-          <div className="w-full my-4 flex justify-center ">
-            <Image 
+          <div className="w-full my-4 flex justify-center">
+            <Image
               src={imagePreview}
+              width={200}
+              height={200}
               alt="Preview"
-              className="h-[200px] rounded"
             />
           </div>
         )}
         <div>
-          <label htmlFor="name" className=" text-sm font-medium text-gray-700 mb-1 flex items-center">
+          <label
+            htmlFor="name"
+            className="text-sm font-medium text-gray-700 mb-1 flex items-center"
+          >
             <FileText className="mr-2" size={18} /> Item Name
           </label>
           <input
@@ -74,7 +91,10 @@ export default function AuctionItemUpload() {
           />
         </div>
         <div>
-          <label htmlFor="description" className=" text-sm font-medium text-gray-700 mb-1 flex items-center">
+          <label
+            htmlFor="description"
+            className="text-sm font-medium text-gray-700 mb-1 flex items-center"
+          >
             <FileText className="mr-2" size={18} /> Description
           </label>
           <textarea
@@ -86,7 +106,10 @@ export default function AuctionItemUpload() {
           ></textarea>
         </div>
         <div>
-          <label htmlFor="startingPrice" className=" text-sm font-medium text-gray-700 mb-1 flex items-center">
+          <label
+            htmlFor="startingPrice"
+            className="text-sm font-medium text-gray-700 mb-1 flex items-center"
+          >
             <DollarSign className="mr-2" size={18} /> Starting Price
           </label>
           <input
@@ -100,7 +123,10 @@ export default function AuctionItemUpload() {
           />
         </div>
         <div>
-          <label htmlFor="auctionStartDate" className="text-sm font-medium text-gray-700 mb-1 flex items-center">
+          <label
+            htmlFor="auctionStartDate"
+            className="text-sm font-medium text-gray-700 mb-1 flex items-center"
+          >
             <Calendar className="mr-2" size={18} /> Auction Start Date
           </label>
           <input
@@ -116,9 +142,9 @@ export default function AuctionItemUpload() {
           disabled={isUploading}
           className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
         >
-          {isUploading ? 'Uploading...' : 'Upload Item'}
+          {isUploading ? "Uploading..." : "Upload Item"}
         </button>
       </form>
     </div>
-  )
+  );
 }

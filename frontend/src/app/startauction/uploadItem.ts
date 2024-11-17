@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export async function uploadItem(formData: FormData) {
-  const file = formData.get('image') as File;
+  const file = formData.get("file") as File;
   const name = formData.get('name') as string;
   const description = formData.get('description') as string;
   const startingPrice = formData.get('startingPrice') as string;
@@ -12,9 +12,6 @@ export async function uploadItem(formData: FormData) {
   }
 
   try {
-    console.log(file)
-    const imageUrl = URL.createObjectURL(file);
-
     const response = await axios.post("/api/uploadItem", formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -24,11 +21,11 @@ export async function uploadItem(formData: FormData) {
     return {
       success: true,
       data: {
-        imageUrl,
         name,
         description,
         startingPrice,
         auctionStartDate,
+        imagePath: response.data.artifact.file, 
         serverResponse: response.data, 
       },
     };

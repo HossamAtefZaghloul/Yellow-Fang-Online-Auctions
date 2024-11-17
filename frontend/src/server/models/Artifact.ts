@@ -1,4 +1,4 @@
-import { Schema, model, Document } from 'mongoose';
+import mongoose, { Schema, model, Document } from 'mongoose';
 
 interface IArtifact extends Document {
   name: string;
@@ -7,42 +7,45 @@ interface IArtifact extends Document {
   startingPrice: number;
   auctionStartDate?: Date;
   auctionEndDate: Date;
-  sold : boolean;
+  sold: boolean;
 }
 
 const artifactSchema = new Schema<IArtifact>({
   name: {
     type: String,
-    required: true,
+    required: false,
     trim: true
   },
   description: {
     type: String,
-    required: true,
+    required: false,
     trim: true
   },
   image: {
-    type: String,
-    required: true
+    type: String,  // Optional
+    required: false
   },
   startingPrice: {
     type: Number,
-    required: true,
+    required: false,
     min: 0
   },
   auctionStartDate: {
     type: Date,
-    default: Date.now
+    default: Date.now,
+    required: false,
   },
   auctionEndDate: {
-    type: Date,
-    required: true
+    type: Date,  // Optional
+    required: false
   },
   sold: {
     type: Boolean,
+    required: false,
   }
 });
 
-const Artifact = model<IArtifact>('Artifact', artifactSchema);
+// Check if the model already exists in mongoose.models to avoid overwriting
+const Artifact = mongoose.models.Artifact || model<IArtifact>('Artifact', artifactSchema);
 
 export default Artifact;
