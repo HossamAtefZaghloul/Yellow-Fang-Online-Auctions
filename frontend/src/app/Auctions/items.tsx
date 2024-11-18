@@ -28,7 +28,6 @@ const formatCountdown = (timeLeft: number) => {
 
 const StarArtifact = ({ artifact }: { artifact: Artifact }) => {
   const [countdown, setCountdown] = useState("");
-  console.log(artifact);
   useEffect(() => {
     const timer = setInterval(() => {
       const now = new Date().getTime();
@@ -53,12 +52,10 @@ const StarArtifact = ({ artifact }: { artifact: Artifact }) => {
         <Star className="w-8 h-8 text-yellow-300" />
       </div>
       <div className="flex items-center justify-center w-full h-[400px] object-cover rounded-md mb-4 bg-white">
-        <Image
+        <img
           src={artifact.image}
           alt={artifact.name}
-          width={300}
-          height={300}
-          className=""
+          className="w-full h-full rounded "
         />
       </div>
 

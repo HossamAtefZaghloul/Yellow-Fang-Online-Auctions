@@ -7,7 +7,6 @@ const store = configureStore({
   },
 });
 
-// Define types for RootState and AppDispatch for TypeScript support
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 

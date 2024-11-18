@@ -3,7 +3,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 interface UserState {
   userId: string | null;
   email: string | null;
-  isAdmin: boolean;
+  isAdmin: string;
 }
 
 const initialState: UserState = (() => {
@@ -27,7 +27,7 @@ const authSlice = createSlice({
       // Clear the state and localStorage on logout
       state.userId = null;
       state.email = null;
-      state.isAdmin = false;
+      state.isAdmin = "user";
 
       localStorage.removeItem("authData");
     },

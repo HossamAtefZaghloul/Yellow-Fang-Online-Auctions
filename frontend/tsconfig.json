@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "typeRoots": ["./@types/node-cron.d.ts", "./types"],
     "target": "ES6",
     "module": "CommonJS", // Ensure this is CommonJS
     "moduleResolution": "node", // Node-style resolution
@@ -37,7 +38,7 @@
     "src/lib/mongodb.js",
     "src/server/models/User.js",
     "src/server/models/User.js"
-, "../middleware.ts"  ],
+, "../middleware.ts", "src/server/server.js"  ],
   "exclude": [
     "node_modules"
   ]

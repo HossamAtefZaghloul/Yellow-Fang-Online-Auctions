@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { Gavel } from "lucide-react";
 import Link from "next/link";
+import { useSelector } from "react-redux";
+import { RootState } from "../store";
 
 type NavItem = {
   title: string;
@@ -34,7 +36,7 @@ const navItems: NavItem[] = [
 export default function Component() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
+  const { isAdmin } = useSelector((state: RootState) => state.auth);
   return (
     <nav className="w-full border-t-2 border-b-2 p-2">
       <div className="md:hidden">
@@ -85,14 +87,16 @@ export default function Component() {
               )}
             </li>
           ))}
-          <Link href="/startauction" className="flex items-center">
-            <Gavel />
-            Start Auction
-          </Link>
+          {isAdmin === "admin" && (
+            <Link href="/startauction" className="flex items-center">
+              <Gavel />
+              Start Auction
+            </Link>
+          )}
         </ul>
       )}
 
-      {/* Desktop Menu */}
+      {/*Desktop*/}
       <ul className="hidden md:flex w-full justify-center items-center gap-4">
         {navItems.map((item, index) => (
           <li
@@ -128,10 +132,12 @@ export default function Component() {
             )}
           </li>
         ))}
-        <Link href="/startauction" className="flex items-center">
-          <Gavel />
-          Start Auction
-        </Link>
+        {isAdmin === "admin" && (
+          <Link href="/startauction" className="flex items-center">
+            <Gavel />
+            Start Auction
+          </Link>
+        )}
       </ul>
     </nav>
   );
