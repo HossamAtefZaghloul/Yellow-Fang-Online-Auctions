@@ -61,15 +61,26 @@ export default async function handler(
         .json({ message: "Starting price must be a valid number." });
     }
 
-    // Parse and validate the auction start date
-    console.log(auctionStartDate);
-    const acceptedFormats = ["MM/dd/yyyy HH:mm a", "yyyy-MM-dd'T'HH:mm:ss"];
-    console.log(acceptedFormats);
 
-    const parsedDate = acceptedFormats
-      .map((format) => parse(auctionStartDate, format, new Date()))
-      .find(isValid);
-      console.log(parsedDate);
+    // Parse and validate the auction start date
+    let parsedDate: Date | undefined;
+
+    // Check for ISO 8601 format first
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?(\.\d{1,3})?(Z|[-+]\d{2}:\d{2})?$/.test(auctionStartDate)) {
+      parsedDate = new Date(auctionStartDate);
+    } else {
+      // Try parsing with accepted formats
+      const acceptedFormats = ["MM/dd/yyyy HH:mm a", "yyyy-MM-dd'T'HH:mm:ss"];
+      parsedDate = acceptedFormats
+        .map((format) => parse(auctionStartDate, format, new Date()))
+        .find(isValid);
+    }
+
+    if (!parsedDate || isNaN(parsedDate.getTime())) {
+      return res
+        .status(400)
+        .json({ message: "Invalid auction start date format." });
+    }
 
 
     const newItem = new Artifact({

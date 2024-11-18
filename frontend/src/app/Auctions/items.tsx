@@ -3,10 +3,11 @@
 import { useState, useEffect } from "react";
 import { Star, Calendar, Clock, DollarSign } from "lucide-react";
 import Image from "next/image";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 
-// Define the updated Artifact interface
 interface Artifact {
-  id: number;
+  _id: number;
   name: string;
   description: string;
   image: string;
@@ -14,43 +15,6 @@ interface Artifact {
   startingPrice: number;
 }
 
-// Sample data (replace this with your actual data fetching logic)
-const sampleArtifacts: Artifact[] = [
-  {
-    id: 1,
-    name: "123",
-    description: "1dad",
-    image: "/uploads/1731794189337-3.jpg",
-    auctionStartDate: "2024-11-18T21:56:29.348+00:00",
-    startingPrice: 123123,
-  },
-  {
-    id: 2,
-    name: "Ancient Vase",
-    description: "A beautifully preserved vase from the 5th century",
-    image: "/artifacts/1.jpg",
-    auctionStartDate: "2024-11-17T21:56:29.328+00:00",
-    startingPrice: 5000,
-  },
-  {
-    id: 3,
-    name: "Medieval Sword",
-    description: "A well-crafted sword from the medieval period",
-    image: "/artifacts/17.jpg",
-    auctionStartDate: "2024-11-16T21:56:29.348+00:00",
-    startingPrice: 10000,
-  },
-  {
-    id: 4,
-    name: "Renaissance Painting",
-    description: "A masterpiece from the Renaissance era",
-    image: "/artifacts/18.jpg",
-    auctionStartDate: "2024-11-16T21:56:29.348+00:00",
-    startingPrice: 50000,
-  },
-];
-
-// Function to format the countdown
 const formatCountdown = (timeLeft: number) => {
   const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
   const hours = Math.floor(
@@ -61,10 +25,10 @@ const formatCountdown = (timeLeft: number) => {
 
   return `${days}d ${hours}h ${minutes}m ${seconds}s`;
 };
-// StarArtifact component for the upcoming artifact
+
 const StarArtifact = ({ artifact }: { artifact: Artifact }) => {
   const [countdown, setCountdown] = useState("");
-
+  console.log(artifact);
   useEffect(() => {
     const timer = setInterval(() => {
       const now = new Date().getTime();
@@ -88,14 +52,16 @@ const StarArtifact = ({ artifact }: { artifact: Artifact }) => {
         <h2 className="text-2xl font-bold">{artifact.name}</h2>
         <Star className="w-8 h-8 text-yellow-300" />
       </div>
-      <div className="flex items-center justify-center w-full h-[400px] object-cover rounded-md mb-4 bg-white"><Image
-        src={artifact.image}
-        alt={artifact.name}
-        width={300}
-        height={300}
-        className=""
-      /></div>
-      
+      <div className="flex items-center justify-center w-full h-[400px] object-cover rounded-md mb-4 bg-white">
+        <Image
+          src={artifact.image}
+          alt={artifact.name}
+          width={300}
+          height={300}
+          className=""
+        />
+      </div>
+
       <p className="mb-4">{artifact.description}</p>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center">
@@ -115,7 +81,6 @@ const StarArtifact = ({ artifact }: { artifact: Artifact }) => {
   );
 };
 
-// ArtifactCard component for regular artifacts
 const ArtifactCard = ({ artifact }: { artifact: Artifact }) => (
   <div className="bg-card text-card-foreground p-4 rounded-lg shadow">
     <h3 className="text-lg font-semibold mb-2">{artifact.name}</h3>
@@ -139,25 +104,42 @@ const ArtifactCard = ({ artifact }: { artifact: Artifact }) => (
 );
 
 export default function ArtifactsAuctionPage() {
-  const [artifacts, setArtifacts] = useState<Artifact[]>([]);
+  const [upcomingArtifact, setUpcomingArtifact] = useState<Artifact | null>(null);
+  const [remainingArtifacts, setRemainingArtifacts] = useState<Artifact[]>([]);
+
+  const fetchArtifacts = async () => {
+    const { data } = await axios.get("/api/getItems");
+    return data;
+  };
+
+  const { data, isLoading, error } = useQuery<Artifact[]>({
+    queryKey: ["artifacts"],
+    queryFn: fetchArtifacts,
+  });
 
   useEffect(() => {
-    // Simulating data fetching
-    setArtifacts(sampleArtifacts);
-  }, []);
+    if (data) {
+      const sortedArtifacts = [...data].sort(
+        (a, b) =>
+          new Date(a.auctionStartDate).getTime() -
+          new Date(b.auctionStartDate).getTime()
+      );
 
-  // Sort artifacts by auction start date and find the upcoming one
-  const sortedArtifacts = [...artifacts].sort(
-    (a, b) =>
-      new Date(a.auctionStartDate).getTime() -
-      new Date(b.auctionStartDate).getTime()
-  );
-  const upcomingArtifact = sortedArtifacts.find(
-    (artifact) => new Date(artifact.auctionStartDate) > new Date()
-  );
-  const remainingArtifacts = sortedArtifacts.filter(
-    (artifact) => artifact.id !== upcomingArtifact?.id
-  );
+      const nextArtifact =
+        sortedArtifacts.find(
+          (artifact) => new Date(artifact.auctionStartDate) > new Date()
+        ) || null;
+
+      setUpcomingArtifact(nextArtifact);
+
+      setRemainingArtifacts(
+        sortedArtifacts.filter((artifact) => artifact._id !== nextArtifact?._id)
+      );
+    }
+  }, [data]);
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error loading artifacts!</div>;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -167,7 +149,7 @@ export default function ArtifactsAuctionPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {remainingArtifacts.map((artifact) => (
-          <ArtifactCard key={artifact.id} artifact={artifact} />
+          <ArtifactCard key={artifact._id} artifact={artifact} />
         ))}
       </div>
     </div>
