@@ -7,8 +7,11 @@ interface UserState {
 }
 
 const initialState: UserState = (() => {
-  const savedUser = localStorage.getItem("authData");
-  return savedUser ? JSON.parse(savedUser) : { userId: null, email: null, isAdmin: false };
+  if (typeof window !== "undefined") {
+    const savedUser = localStorage.getItem("authData");
+    return savedUser ? JSON.parse(savedUser) : { userId: null, email: null, isAdmin: false };
+  }
+  return { userId: null, email: null, isAdmin: false };
 })();
 
 const authSlice = createSlice({

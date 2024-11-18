@@ -1,41 +1,26 @@
 import { Server } from 'socket.io';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Server as HttpServer } from 'http';
-import { Socket as NetSocket } from 'net';
-import cron from 'node-cron';
 
-type NextApiResponseWithSocket = NextApiResponse & {
-  socket: {
-    server: HttpServer & {
-      io?: Server;
-    };
-  };
-};
-
-const handler = (req: NextApiRequest, res: NextApiResponseWithSocket) => {
+const handler = (req: NextApiRequest, res: NextApiResponse & { socket: { server: HttpServer } }) => {
   if (!res.socket.server.io) {
-    console.log('Initializing Socket.IO server...');
     const io = new Server(res.socket.server);
     res.socket.server.io = io;
 
-    // Handle Socket.IO connections
     io.on('connection', (socket) => {
-      console.log('A user connected:', socket.id);
+      console.log('User connected:', socket.id);
 
       socket.on('disconnect', () => {
-        console.log('A user disconnected:', socket.id);
+        console.log('User disconnected:', socket.id);
+      });
+
+      // Broadcasting auction start to all clients
+      socket.on('auction-started', (data) => {
+        console.log('Auction started event received:', data);
+        io.emit('auction-started', { message: 'Auction started: Join | Decline' });
       });
     });
-
-    // Schedule the 7 PM notification
-    cron.schedule('0 19 * * *', () => {
-      console.log('Broadcasting auction notification...');
-      io.emit('auction-started', { message: 'Auction started: Join | Decline' });
-    });
-  } else {
-    console.log('Socket.IO server already initialized.');
   }
-
   res.end();
 };
 

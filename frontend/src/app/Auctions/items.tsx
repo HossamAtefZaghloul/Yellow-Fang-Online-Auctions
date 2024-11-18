@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { Star, Calendar, Clock, DollarSign } from "lucide-react";
-import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { showNotification } from "../store/notificationSlice";
+import getSocket from "../../utils/socket"; // Make sure to import socket client
 
 interface Artifact {
   _id: number;
@@ -28,6 +30,9 @@ const formatCountdown = (timeLeft: number) => {
 
 const StarArtifact = ({ artifact }: { artifact: Artifact }) => {
   const [countdown, setCountdown] = useState("");
+  const dispatch = useDispatch();
+  const socket = getSocket();
+
   useEffect(() => {
     const timer = setInterval(() => {
       const now = new Date().getTime();
@@ -39,12 +44,17 @@ const StarArtifact = ({ artifact }: { artifact: Artifact }) => {
       } else {
         setCountdown("Auction has started!");
         clearInterval(timer);
+        
+        // Emit auction-started event to notify users
+        socket.emit("auction-started", { message: "Auction started: Join | Decline" });
+        
+        // Optionally, you can also trigger a Redux action to show the notification on the current user's UI
+        dispatch(showNotification("Live Auction started Artifact :" + artifact.name));
       }
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [artifact.auctionStartDate]);
-
+  }, [artifact.auctionStartDate, dispatch]);
   return (
     <div className="bg-primary text-primary-foreground p-6 rounded-lg shadow-lg mb-8">
       <div className="flex items-center justify-between mb-4">
