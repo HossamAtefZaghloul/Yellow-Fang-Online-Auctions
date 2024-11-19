@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "typeRoots": ["./@types/node-cron.d.ts", "./types"],
     "target": "ES6",
     "module": "CommonJS", // Ensure this is CommonJS
     "moduleResolution": "node", // Node-style resolution

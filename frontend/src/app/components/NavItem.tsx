@@ -4,7 +4,8 @@ import React, { useState } from "react";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { Gavel } from "lucide-react";
 import Link from "next/link";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { showNotification } from "../store/notificationSlice";
 import { RootState } from "../store";
 
 type NavItem = {
@@ -37,6 +38,8 @@ export default function Component() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isAdmin } = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch();
+
   return (
     <nav className="w-full border-t-2 border-b-2 p-2">
       <div className="md:hidden">
@@ -138,6 +141,11 @@ export default function Component() {
             Start Auction
           </Link>
         )}
+        <button
+          onClick={() => dispatch(showNotification("Hello from Route A!"))}
+        >
+          Trigger Notification
+        </button>
       </ul>
     </nav>
   );
