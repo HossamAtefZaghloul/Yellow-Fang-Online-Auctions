@@ -4,8 +4,15 @@ import { Server as HttpServer } from 'http';
 
 const handler = (req: NextApiRequest, res: NextApiResponse & { socket: { server: HttpServer } }) => {
   if (!res.socket.server.io) {
-    const io = new Server(res.socket.server);
-    res.socket.server.io = io;
+    console.log("Initializing Socket.IO...");
+
+    const io = new Server(res.socket.server, {
+      path: "/api/socket",
+      cors: {
+        origin: "*",
+        methods: ["GET", "POST"],
+      },
+    });
 
     io.on('connection', (socket) => {
       console.log('User connected:', socket.id);
@@ -20,6 +27,10 @@ const handler = (req: NextApiRequest, res: NextApiResponse & { socket: { server:
         io.emit('auction-started', { message: 'Auction started: Join | Decline' });
       });
     });
+
+    res.socket.server.io = io;
+  } else {
+    console.log("Socket.IO already initialized.");
   }
   res.end();
 };

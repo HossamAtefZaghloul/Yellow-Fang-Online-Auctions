@@ -38,17 +38,14 @@ const StarArtifact = ({ artifact }: { artifact: Artifact }) => {
       const now = new Date().getTime();
       const auctionStart = new Date(artifact.auctionStartDate).getTime();
       const timeLeft = auctionStart - now;
-
       if (timeLeft > 0) {
         setCountdown(formatCountdown(timeLeft));
       } else {
         setCountdown("Auction has started!");
         clearInterval(timer);
-        
-        // Emit auction-started event to notify users
+
         socket.emit("auction-started", { message: "Auction started: Join | Decline" });
         
-        // Optionally, you can also trigger a Redux action to show the notification on the current user's UI
         dispatch(showNotification("Live Auction started Artifact :" + artifact.name));
       }
     }, 1000);

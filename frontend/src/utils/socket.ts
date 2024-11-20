@@ -1,12 +1,21 @@
-import { io, Socket } from 'socket.io-client';
+import { io, Socket } from "socket.io-client";
 
-let socket: Socket;
+let socket: Socket | undefined;
 
-const getSocket = () => {
+const getSocket = (): Socket => {
   if (!socket) {
-    socket = io('http://localhost:3000'); 
+    socket = io({
+      path: "/api/socket",
+    });
   }
   return socket;
+};
+
+export const disconnectSocket = (): void => {
+  if (socket) {
+    socket.disconnect();
+    socket = undefined;
+  }
 };
 
 export default getSocket;
