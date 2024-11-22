@@ -17,7 +17,6 @@ export default function ClientLayout({
 }) {
   const pathname = usePathname();
   const showHeaderFooter = pathname !== "/login" && pathname !== "/register";
-
   return (
     <QueryClientProvider client={queryClient}>
       <GoogleOAuthProvider clientId="164036916869-gohps9d2g19ehu6j379n59rei2c8k5dp.apps.googleusercontent.com">

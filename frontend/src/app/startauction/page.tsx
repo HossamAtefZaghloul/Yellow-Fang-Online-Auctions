@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { uploadItem } from "./uploadItem";
 import Image from "next/image";
+import {loadAuctionsToRedis} from "./loadAuctionsToRedis" 
 
 export default function AuctionItemUpload() {
   const [isUploading, setIsUploading] = useState(false);
@@ -39,6 +40,7 @@ export default function AuctionItemUpload() {
       console.log('Upload failed:', result.error);
     } else {
       console.log("Item uploaded successfully:", result.data);
+      await loadAuctionsToRedis(); 
       router.push("/auctions");
     }
   }

@@ -37,7 +37,7 @@
     "src/lib/mongodb.js",
     "src/server/models/User.js",
     "src/server/models/User.js"
-, "../middleware.ts", "src/server/server.js"  ],
+, "../middleware.ts", "src/server/server.ts"  ],
   "exclude": [
     "node_modules"
   ]
