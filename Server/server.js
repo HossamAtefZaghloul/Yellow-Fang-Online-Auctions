@@ -72,15 +72,6 @@ mongoose.connect(MONGO_URL)
   })
   .catch(error => console.error(`Database connection failed: ${error}`));
 
-// Routes
-app.post('/upload', upload.single('file'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: 'No file uploaded' });
-  }
-  res.status(200).json({ message: 'File uploaded successfully', file: req.file });
-});
-
-
 
 
 // WebSocket setup (if needed)
@@ -109,9 +100,11 @@ const redis = new Redis();
 
 const checkUpcomingAuctions = async () => {
   try {
-    // Use zrangebyscore for compatibility
-    const auctions = await redis.zrangebyscore("auctions", "-inf", "+inf", "WITHSCORES");
-   
+    const currentTime = Date.now(); // Get the current time in milliseconds
+
+    // Fetch only auctions with timestamps >= currentTime
+    const auctions = await redis.zrangebyscore("auctions", currentTime, "+inf", "WITHSCORES");
+
     // Process the results
     for (let i = 0; i < auctions.length; i += 2) {
       const value = auctions[i];
@@ -120,13 +113,14 @@ const checkUpcomingAuctions = async () => {
       try {
         const auction = JSON.parse(value); // Parse the JSON string
         const timestamp = Number(score); // Convert score to number
-        const currentTime = Date.now(); // Get the current time in milliseconds
-        console.log('timestamp',timestamp);
-        console.log('currentTime',currentTime);
+
+        console.log("Auction Timestamp:", timestamp);
+        console.log("Current Time:", currentTime);
+
         // Check if auctionStartDate matches the current time (within a 1-second window)
         if (Math.abs(timestamp - currentTime) <= 1000) {
           console.log(`Auction "${auction._id}" starts now!`);
-          // Here you can publish to the `auction-start` channel
+          // Publish to the "auction-start" channel
           redis.publish("auction-start", JSON.stringify(auction));
         }
       } catch (error) {
@@ -138,5 +132,5 @@ const checkUpcomingAuctions = async () => {
   }
 };
 
-// Call the function to test
+// Call the function periodically to monitor upcoming auctions
 setInterval(checkUpcomingAuctions, 1000); // Check every second
