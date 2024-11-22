@@ -7,7 +7,7 @@ async function loadAuctionsToRedis() {
   
   const upcomingAuctions = await Artifact.find({
     auctionStartDate: { $gt: now },
-  });
+  }).select("auctionStartDate");
 
   console.log(`Found ${upcomingAuctions.length} upcoming auctions.`);
 

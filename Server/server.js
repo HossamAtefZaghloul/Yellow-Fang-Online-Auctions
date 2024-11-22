@@ -80,53 +80,6 @@ app.post('/upload', upload.single('file'), (req, res) => {
   res.status(200).json({ message: 'File uploaded successfully', file: req.file });
 });
 
-// Redis Integration (Example)
-const checkUpcomingAuctions = async () => {
-  try {
-    // Get all auctions from Redis
-    const rawAuctions = await redisClient.zRange('auctions', 0, -1, { WITHSCORES: true });
-
-    // Group values and scores into pairs
-    const allAuctions = [];
-    for (let i = 0; i < rawAuctions.length; i += 2) {
-      allAuctions.push([rawAuctions[i], rawAuctions[i + 1]]);
-    }
-
-    // Loop through the auctions and parse them
-    allAuctions.forEach(([value, score]) => {
-      console.log("Raw value from Redis:", value); // Log raw value for inspection
-      console.log("Score from Redis:", score);    // Log score for debugging
-      try {
-        const auction = JSON.parse(value); // Parse the JSON string
-
-        // Validate and format the score
-        const timestamp = Number(score);
-        if (isNaN(timestamp)) {
-          throw new Error("Invalid score value: " + score);
-        }
-
-        const formattedDate = new Date(timestamp).toISOString(); // Convert to ISO format
-
-        console.log({
-          id: auction._id,
-          name: auction.name,
-          description: auction.description,
-          image: auction.image,
-          startingPrice: auction.startingPrice,
-          auctionStartDate: auction.auctionStartDate,
-          score: formattedDate // Use validated date
-        });
-      } catch (error) {
-        console.error("Error parsing JSON or formatting date:", error.message); // Catch parsing and date errors
-      }
-    });
-  } catch (error) {
-    console.error("Error checking auctions:", error.message); // Catch Redis query errors
-  }
-};
-
-checkUpcomingAuctions();
-
 
 
 
@@ -147,3 +100,43 @@ io.on("connection", (socket) => {
 app.use((req, res) => {
   res.status(404).json({ message: "Endpoint not found" });
 });
+
+
+
+import Redis from "ioredis";
+
+const redis = new Redis();
+
+const checkUpcomingAuctions = async () => {
+  try {
+    // Use zrangebyscore for compatibility
+    const auctions = await redis.zrangebyscore("auctions", "-inf", "+inf", "WITHSCORES");
+   
+    // Process the results
+    for (let i = 0; i < auctions.length; i += 2) {
+      const value = auctions[i];
+      const score = auctions[i + 1];
+
+      try {
+        const auction = JSON.parse(value); // Parse the JSON string
+        const timestamp = Number(score); // Convert score to number
+        const currentTime = Date.now(); // Get the current time in milliseconds
+        console.log('timestamp',timestamp);
+        console.log('currentTime',currentTime);
+        // Check if auctionStartDate matches the current time (within a 1-second window)
+        if (Math.abs(timestamp - currentTime) <= 1000) {
+          console.log(`Auction "${auction._id}" starts now!`);
+          // Here you can publish to the `auction-start` channel
+          redis.publish("auction-start", JSON.stringify(auction));
+        }
+      } catch (error) {
+        console.error("Error parsing auction data:", error.message);
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching auctions from Redis:", error.message);
+  }
+};
+
+// Call the function to test
+setInterval(checkUpcomingAuctions, 1000); // Check every second
