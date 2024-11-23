@@ -6,7 +6,6 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../store/notificationSlice";
-import getSocket from "../../utils/socket"; // Make sure to import socket client
 
 interface Artifact {
   _id: number;
@@ -31,7 +30,6 @@ const formatCountdown = (timeLeft: number) => {
 const StarArtifact = ({ artifact }: { artifact: Artifact }) => {
   const [countdown, setCountdown] = useState("");
   const dispatch = useDispatch();
-  const socket = getSocket();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -43,10 +41,6 @@ const StarArtifact = ({ artifact }: { artifact: Artifact }) => {
       } else {
         setCountdown("Auction has started!");
         clearInterval(timer);
-
-        socket.emit("auction-started", { message: "Auction started: Join | Decline" });
-        
-        dispatch(showNotification("Live Auction started Artifact :" + artifact.name));
       }
     }, 1000);
 
