@@ -6,29 +6,29 @@ interface IArtifact extends Document {
   image: string;
   startingPrice: number;
   auctionStartDate?: Date;
-  auctionEndDate: Date;
-  sold: boolean;
+  auctionEndDate?: Date;
+  auctionStatus: 'notStarted' | 'live' | 'sold';  
 }
 
 const artifactSchema = new Schema<IArtifact>({
   name: {
     type: String,
     required: false,
-    trim: true
+    trim: true,
   },
   description: {
     type: String,
     required: false,
-    trim: true
+    trim: true,
   },
   image: {
-    type: String,  // Optional
-    required: false
+    type: String,  
+    required: false,
   },
   startingPrice: {
     type: Number,
     required: false,
-    min: 0
+    min: 0,
   },
   auctionStartDate: {
     type: Date,
@@ -36,16 +36,17 @@ const artifactSchema = new Schema<IArtifact>({
     required: false,
   },
   auctionEndDate: {
-    type: Date,  // Optional
-    required: false
-  },
-  sold: {
-    type: Boolean,
+    type: Date,  
     required: false,
-  }
+  },
+  auctionStatus: {
+    type: String,
+    enum: ['notStarted', 'live', 'sold'],
+    default: 'notStarted',  
+  },
 });
 
-// Check if the model already exists in mongoose.models to avoid overwriting
+
 const Artifact = mongoose.models.Artifact || model<IArtifact>('Artifact', artifactSchema);
 
 export default Artifact;

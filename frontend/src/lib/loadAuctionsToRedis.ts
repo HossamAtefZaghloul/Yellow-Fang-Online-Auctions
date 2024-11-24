@@ -19,7 +19,7 @@ async function loadAuctionsToRedis(): Promise<void> {
 
   // Process each auction
   for (const auction of upcomingAuctions) {
-    const auctionKey = `auction:${auction._id}`;
+    const auctionKey = `${auction._id}`;
     const auctionData = JSON.stringify(auction);
 
     // Calculate TTL in seconds

@@ -11,6 +11,7 @@ import jwt from 'jsonwebtoken';
 import { createClient } from 'redis';
 import { Server } from 'socket.io';
 import Redis from 'ioredis';
+import axios from 'axios';
 
 dotenv.config();
 // Constants
@@ -129,10 +130,24 @@ function listenForExpiredKeys() {
   });
 
   // Listen for messages on the channel
-  subscriber.on("message", (channel, expiredKey) => {
+  subscriber.on("message", async (channel, expiredKey) => {
     console.log(`Key expired: ${expiredKey}`);
-    io.emit('auction-start'); 
-    // Add any additional logic for the expired key here
+    io.emit('auction-start');
+  
+    try {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/updateArtifact`, {
+        id: expiredKey,
+        auctionStatus: 'live',
+      });
+  
+      if (response.status === 200) {
+        console.log(`Artifact with ID ${expiredKey} is now live.`);
+      } else {
+        console.log(`Failed to update artifact. Response:`, response.data);
+      }
+    } catch (error) {
+      console.error(`Error updating artifact:`, error);
+    }
   });
 }
 
