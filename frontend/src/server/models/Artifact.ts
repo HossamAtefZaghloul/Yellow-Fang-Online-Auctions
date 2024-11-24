@@ -1,13 +1,14 @@
 import mongoose, { Schema, model, Document } from 'mongoose';
 
-interface IArtifact extends Document {
+export interface IArtifact extends Document {
   name: string;
   description: string;
   image: string;
   startingPrice: number;
   auctionStartDate?: Date;
   auctionEndDate?: Date;
-  auctionStatus: 'notStarted' | 'live' | 'sold';  
+  auctionStatus: 'notStarted' | 'live' | 'sold';
+  bids: mongoose.Types.ObjectId[]; 
 }
 
 const artifactSchema = new Schema<IArtifact>({
@@ -22,7 +23,7 @@ const artifactSchema = new Schema<IArtifact>({
     trim: true,
   },
   image: {
-    type: String,  
+    type: String,
     required: false,
   },
   startingPrice: {
@@ -36,17 +37,22 @@ const artifactSchema = new Schema<IArtifact>({
     required: false,
   },
   auctionEndDate: {
-    type: Date,  
+    type: Date,
     required: false,
   },
   auctionStatus: {
     type: String,
     enum: ['notStarted', 'live', 'sold'],
-    default: 'notStarted',  
+    default: 'notStarted',
   },
+  bids: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Bid',
+    },
+  ],
 });
 
 
 const Artifact = mongoose.models.Artifact || model<IArtifact>('Artifact', artifactSchema);
-
 export default Artifact;

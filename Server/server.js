@@ -78,43 +78,7 @@ io.on('connection', (socket) => {
   });
 });
 
-// Auction Monitoring with Redis and Socket.IO
-// const processedAuctions = new Set();
-// const checkUpcomingAuctions = async () => {
-//   try {
-//     const currentTime = Date.now();
-//     const auctions = await redis.zrangebyscore('auctions', currentTime, '+inf', 'WITHSCORES');
 
-//     for (let i = 0; i < auctions.length; i += 2) {
-//       const value = auctions[i];
-//       const score = auctions[i + 1];
-
-//       try {
-//         const auction = JSON.parse(value);
-//         const timestamp = Number(score);
-
-//         // Avoid reprocessing auctions
-//         if (processedAuctions.has(auction._id)) continue;
-
-//         console.log('Auction Timestamp:', timestamp);
-//         console.log('Current Time:', currentTime);
-
-//         if (Math.abs(timestamp - currentTime) <= 1000) {
-//           console.log(`Auction "${auction._id}" starts now!`);
-          
-//           io.emit('auction-start', auction); 
-//           processedAuctions.add(auction._id);
-//         }
-//       } catch (error) {
-//         console.error('Error parsing auction data:', error.message);
-//       }
-//     }
-//   } catch (error) {
-//     console.error('Error fetching auctions from Redis:', error.message);
-//   }
-// };
-// Periodically Check Auctions
-// setInterval(checkUpcomingAuctions, 1000);
 
 function listenForExpiredKeys() {
   // Create a Redis client for Pub/Sub
