@@ -1,8 +1,10 @@
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../store";
 import { hideNotification } from "../store/notificationSlice";
+import { useRouter } from "next/navigation";
 
 const Notification = () => {
+  const router = useRouter();
   const { message, visible } = useSelector(
     (state: RootState) => state.notification
   );
@@ -26,7 +28,7 @@ const Notification = () => {
         <div className="flex items-center justify-center space-x-4">
           <button
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
-            onClick={() => console.log("Join clicked")} 
+            onClick={() => {router.push("/liveserver"); dispatch(hideNotification())}} 
           >
             Join
           </button>

@@ -1,153 +1,144 @@
-"use client"
+"use client";
+import { useEffect, useState } from 'react'
+import { Clock, DollarSign, History, Info } from 'lucide-react'
+import axios from 'axios';
 
-import { useState, useEffect } from 'react'
-import { Clock, DollarSign, Bell, AlertCircle } from 'lucide-react'
-import { formatCurrency } from './utils'
-import { useSelector } from 'react-redux';
-import { RootState } from '../store';
-
-const auctionItem = {
-  id: 1,
-  name: "Vintage Rolex Watch",
-  description: "A rare, collectible Rolex watch from the 1960s in excellent condition.",
-  imageUrl: "/placeholder.svg?height=300&width=400",
-  startingBid: 5000,
+interface AuctionData {
+  _id: string;
+  name: string;
+  description: string;
+  startingPrice: number;
+  currentBid?: number;
+  auctionStatus: string;
 }
-
-export default function LiveAuction() {
-  const [currentBid, setCurrentBid] = useState(auctionItem.startingBid)
+export default function AuctionPage() {
   const [bidAmount, setBidAmount] = useState('')
-  const [bidHistory, setBidHistory] = useState<{ amount: number; username: string; timestamp: Date }[]>([])
-  const [isAuctionEnded, setIsAuctionEnded] = useState(false)
-  const [winner, setWinner] = useState<{ username: string; amount: number } | null>(null)
-  const [timer, setTimer] = useState(60)
-  const [errorMessage, setErrorMessage] = useState('')
-
-  const { email } = useSelector((state: RootState) => state.auth);
+  const [auction, setAuction] = useState<AuctionData | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout
-
-    if (!isAuctionEnded) {
-      interval = setInterval(() => {
-        setTimer((prevTimer) => {
-          if (prevTimer <= 1) {
-            clearInterval(interval)
-            endAuction()
-            return 0
-          }
-          return prevTimer - 1
-        })
-      }, 1000)
-    }
-
-    return () => clearInterval(interval)
-  }, [isAuctionEnded])
-
-  const endAuction = () => {
-    setIsAuctionEnded(true)
-    if (bidHistory.length > 0) {
-      const lastBid = bidHistory[0]
-      setWinner({ username: lastBid.username, amount: lastBid.amount })
-    } else {
-      setWinner(null)
-    }
-  }
-
-  const handleBidSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const bidValue = parseFloat(bidAmount)
-    if (bidValue <= 0) {
-      setErrorMessage('Bid must be greater than zero!')
-      return
-    }
-    if (bidValue > currentBid) {
-      const confirmBid = window.confirm(`Are you sure you want to place a bid of ${formatCurrency(bidValue)}?`)
-      if (confirmBid) {
-        setCurrentBid(bidValue)
-        const newBid = { amount: bidValue, username: email, timestamp: new Date() }
-        setBidHistory([newBid, ...bidHistory.slice(0, 4)])
-        setBidAmount('')
-        setTimer(60) 
-        setErrorMessage('')
+    const fetchLiveAuction = async () => {
+      try {
+        const response = await axios.get('/api/get_live_auction'); 
+        if (response.data.success) {
+          setAuction(response.data.data);
+        } else {
+          setError(response.data.error || 'Failed to fetch live auction');
+        }
+      } catch (err) {
+        setError('An error occurred while fetching live auction');
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
-    } else {
-      setErrorMessage('Your bid must be higher than the current bid!')
-    }
-  }
+    };
 
+    fetchLiveAuction();
+  }, []); 
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: 404</p>;
+  console.log(auction);
   return (
-    <div className="grid gap-6 md:grid-cols-2 m-1">
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <div className="p-6">
-          <h2 className="text-2xl font-bold mb-4">{auctionItem.name}</h2>
-          <img src={auctionItem.imageUrl} alt={auctionItem.name} className="w-[500px] h-[500px] mb-4 rounded-lg" />
-          <p className="text-gray-600 mb-4">{auctionItem.description}</p>
-          <div className="text-2xl font-bold mb-4 flex items-center">
-            <DollarSign className="mr-2" />
-            Current Bid: {formatCurrency(currentBid)}
-          </div>
-          {!isAuctionEnded ? (
-            <>
-              <form onSubmit={handleBidSubmit} className="flex flex-col gap-2 mb-4">
-                <div className="flex gap-2">
-                  <input
-                    type="number"
-                    value={bidAmount}
-                    onChange={(e) => setBidAmount(e.target.value)}
-                    placeholder="Enter your bid"
-                    className="flex-grow px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                  >
-                    Place Bid
-                  </button>
-                </div>
-                {errorMessage && (
-                  <div className="flex items-center text-red-500 mt-2">
-                    <AlertCircle className="w-4 h-4 mr-2" />
-                    <span>{errorMessage}</span>
-                  </div>
-                )}
-              </form>
-              <div className="text-lg font-semibold">
-                Time remaining: {timer} seconds
-              </div>
-            </>
-          ) : (
-            <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
-              <p className="font-bold">Auction Ended!</p>
-              {winner ? (
-                <p>Winner: {winner.username} with a bid of {formatCurrency(winner.amount)}</p>
-              ) : (
-                <p>No bids were placed.</p>
-              )}
+    <div className="min-h-screen bg-gray-100">
+      <header className="bg-white shadow">
+        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+          <h1 className="text-3xl font-bold text-gray-900">Exclusive Single Item Auction</h1>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div className="px-4 py-6 sm:px-0">
+          <div className="flex flex-col md:flex-row gap-8">
+            <div className="md:w-1/2">
+              <img
+                src={auction.image}
+                alt="Vintage Leather Armchair"
+                className="w-[500px] h-[500px] rounded-lg shadow-lg"
+              />
             </div>
-          )}
+
+            <div className="md:w-1/2 space-y-6">
+              <div>
+                <h2 className="text-2xl font-semibold text-gray-900">{auction.name}</h2>
+                <p className="mt-2 text-gray-600">{auction.description}</p>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <DollarSign className="h-6 w-6 text-green-500 mr-2" />
+                    <span className="text-2xl font-bold text-gray-900">{auction.startingPrice}</span>
+                  </div>
+                  <div className="flex items-center text-gray-500">
+                    <Clock className="h-5 w-5 mr-1" />
+                    <span>2h 15m left</span>
+                  </div>
+                </div>
+
+                <form className="mt-6" onSubmit={(e) => e.preventDefault()}>
+                  <div className="flex items-center">
+                    <input
+                      type="number"
+                      placeholder="Enter your bid"
+                      value={bidAmount}
+                      onChange={(e) => setBidAmount(e.target.value)}
+                      className="flex-grow mr-2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    >
+                      Place Bid
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <h3 className="text-lg font-semibold mb-4 flex items-center">
+                  <Info className="h-5 w-5 mr-2 text-blue-500" />
+                  Item Details
+                </h3>
+                <ul className="list-disc list-inside space-y-2 text-gray-600">
+                  <li>Condition: Excellent</li>
+                  <li>Year: Circa 1960</li>
+                  <li>Material: Genuine leather, solid wood frame</li>
+                  <li>Dimensions: 32" W x 34" D x 38" H</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Bid History */}
+          <div className="mt-12">
+            <h3 className="text-xl font-semibold mb-4 flex items-center">
+              <History className="h-6 w-6 mr-2 text-indigo-500" />
+              Bid History
+            </h3>
+            <div className="bg-white overflow-hidden shadow rounded-lg">
+              <ul className="divide-y divide-gray-200">
+                {[
+                  { name: "Alex Thompson", amount: "$1,250", time: "2 hours ago" },
+                  { name: "Sarah Lee", amount: "$1,200", time: "3 hours ago" },
+                  { name: "Mike Johnson", amount: "$1,150", time: "5 hours ago" },
+                ].map((bid, index) => (
+                  <li key={index} className="px-6 py-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{bid.name}</p>
+                        <p className="text-sm text-gray-500">{bid.time}</p>
+                      </div>
+                      <p className="text-sm font-semibold text-green-600">{bid.amount}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
-      </div>
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <div className="p-6">
-          <h2 className="text-2xl font-bold mb-4">Recent Bids</h2>
-          {bidHistory.length > 0 ? (
-            <ul className="space-y-2">
-              {bidHistory.map((bid, index) => (
-                <li key={index} className="flex justify-between items-center border-b border-gray-200 py-2 last:border-b-0">
-                  <span className="font-semibold">{formatCurrency(bid.amount)} by {bid.username}</span>
-                  <span className="text-sm text-gray-500 flex items-center">
-                    <Clock className="w-4 h-4 mr-1" />
-                    {bid.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-gray-500">No bids yet.</p>
-          )}
-        </div>
-      </div>
+      </main>
     </div>
   )
 }
+
