@@ -141,11 +141,6 @@ export default function Component() {
             Start Auction
           </Link>
         )}
-        <button
-          onClick={() => dispatch(showNotification("Hello from Route A!"))}
-        >
-          Trigger Notification
-        </button>
       </ul>
     </nav>
   );

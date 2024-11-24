@@ -34,7 +34,7 @@ export default function AuctionItemUpload() {
 
     setIsUploading(true);
     const result = await uploadItem(formData);
-    setIsUploading(false);
+  
 
     if (result.error) {
       console.log('Upload failed:', result.error);
@@ -42,6 +42,7 @@ export default function AuctionItemUpload() {
       console.log("Item uploaded successfully:", result.data);
       await loadAuctionsToRedis(); 
       router.push("/auctions");
+      setIsUploading(false);
     }
   }
 

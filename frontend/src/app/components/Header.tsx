@@ -36,22 +36,6 @@ export default function Header() {
                 Auctions
               </Link>
             </li>
-            <li>
-              <Link
-                href="/paintings"
-                className={`${pathname === "/paintings" ? "active-link" : ""}`}
-              >
-                Paintings
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/artifacts"
-                className={`${pathname === "/artifacts" ? "active-link" : ""}`}
-              >
-                Artifacts
-              </Link>
-            </li>
           </ul>
           <ul className="flex  space-x-4">
             <li className="flex items-start">

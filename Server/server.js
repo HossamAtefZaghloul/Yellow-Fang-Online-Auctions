@@ -13,7 +13,6 @@ import { Server } from 'socket.io';
 import Redis from 'ioredis';
 
 dotenv.config();
-
 // Constants
 const PORT = process.env.PORT || 5000;
 const MONGO_URL = process.env.MONGO_URL;
@@ -69,7 +68,7 @@ mongoose
   })
   .catch((error) => console.error(`Database connection failed: ${error}`));
 
-// WebSocket Setup
+// WebSocket Setup  
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
 
@@ -79,44 +78,70 @@ io.on('connection', (socket) => {
 });
 
 // Auction Monitoring with Redis and Socket.IO
-const processedAuctions = new Set();
+// const processedAuctions = new Set();
+// const checkUpcomingAuctions = async () => {
+//   try {
+//     const currentTime = Date.now();
+//     const auctions = await redis.zrangebyscore('auctions', currentTime, '+inf', 'WITHSCORES');
 
-const checkUpcomingAuctions = async () => {
-  try {
-    const currentTime = Date.now();
-    const auctions = await redis.zrangebyscore('auctions', currentTime, '+inf', 'WITHSCORES');
+//     for (let i = 0; i < auctions.length; i += 2) {
+//       const value = auctions[i];
+//       const score = auctions[i + 1];
 
-    for (let i = 0; i < auctions.length; i += 2) {
-      const value = auctions[i];
-      const score = auctions[i + 1];
+//       try {
+//         const auction = JSON.parse(value);
+//         const timestamp = Number(score);
 
-      try {
-        const auction = JSON.parse(value);
-        const timestamp = Number(score);
+//         // Avoid reprocessing auctions
+//         if (processedAuctions.has(auction._id)) continue;
 
-        // Avoid reprocessing auctions
-        if (processedAuctions.has(auction._id)) continue;
+//         console.log('Auction Timestamp:', timestamp);
+//         console.log('Current Time:', currentTime);
 
-        console.log('Auction Timestamp:', timestamp);
-        console.log('Current Time:', currentTime);
-
-        if (Math.abs(timestamp - currentTime) <= 1000) {
-          console.log(`Auction "${auction._id}" starts now!`);
+//         if (Math.abs(timestamp - currentTime) <= 1000) {
+//           console.log(`Auction "${auction._id}" starts now!`);
           
-          io.emit('auction-start', auction); // Emit real-time event
-          processedAuctions.add(auction._id);
-        }
-      } catch (error) {
-        console.error('Error parsing auction data:', error.message);
-      }
-    }
-  } catch (error) {
-    console.error('Error fetching auctions from Redis:', error.message);
-  }
-};
-
+//           io.emit('auction-start', auction); 
+//           processedAuctions.add(auction._id);
+//         }
+//       } catch (error) {
+//         console.error('Error parsing auction data:', error.message);
+//       }
+//     }
+//   } catch (error) {
+//     console.error('Error fetching auctions from Redis:', error.message);
+//   }
+// };
 // Periodically Check Auctions
-setInterval(checkUpcomingAuctions, 1000);
+// setInterval(checkUpcomingAuctions, 1000);
+
+function listenForExpiredKeys() {
+  // Create a Redis client for Pub/Sub
+  const subscriber = redis.duplicate();
+
+  // Subscribe to the expired events channel
+  subscriber.subscribe("__keyevent@0__:expired", (err) => {
+    if (err) {
+      console.error("Failed to subscribe to expired events", err);
+    } else {
+      console.log("Subscribed to key expiration events.");
+    }
+  });
+
+  // Listen for messages on the channel
+  subscriber.on("message", (channel, expiredKey) => {
+    console.log(`Key expired: ${expiredKey}`);
+    io.emit('auction-start'); 
+    // Add any additional logic for the expired key here
+  });
+}
+
+listenForExpiredKeys();
+
 
 // 404 Handling
 app.use((req, res) => res.status(404).json({ message: 'Endpoint not found' }));
+
+
+
+
