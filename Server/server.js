@@ -69,7 +69,7 @@ mongoose
   })
   .catch((error) => console.error(`Database connection failed: ${error}`));
 
-// WebSocket Setup  
+// WebSocket Setup
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
 
@@ -79,7 +79,30 @@ io.on('connection', (socket) => {
 });
 
 
+// Notify place-live-bid
+app.post("/place-live-bid", (req, res) => {
+  const newBid = req.body; 
 
+  console.log("place-live-bid :", newBid);
+
+  // Emit the new bid to all clients
+  io.emit("placed-live-bid", newBid);
+
+  res.status(200).json({ success: true, message: "Live bids notification sent." });
+});
+
+// Notify Live Bids Route
+app.post("/notify-live-bids", (req, res) => {
+  const liveBids = req.body.liveBids; 
+
+  console.log("Received live bids:", liveBids);
+
+  io.emit('new-live-bids', liveBids);
+
+  res.status(200).json({ success: true, message: "Live bids notification sent." });
+});
+
+// Function to Listen for Expired Keys in Redis
 function listenForExpiredKeys() {
   // Create a Redis client for Pub/Sub
   const subscriber = redis.duplicate();
@@ -97,13 +120,13 @@ function listenForExpiredKeys() {
   subscriber.on("message", async (channel, expiredKey) => {
     console.log(`Key expired: ${expiredKey}`);
     io.emit('auction-start');
-  
+
     try {
       const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/updateArtifact`, {
         id: expiredKey,
         auctionStatus: 'live',
       });
-  
+
       if (response.status === 200) {
         console.log(`Artifact with ID ${expiredKey} is now live.`);
       } else {
@@ -117,10 +140,19 @@ function listenForExpiredKeys() {
 
 listenForExpiredKeys();
 
-
 // 404 Handling
 app.use((req, res) => res.status(404).json({ message: 'Endpoint not found' }));
+// function disconnectAllUsers() {
+//   const connectedSockets = io.sockets.sockets;
+  
+//   connectedSockets.forEach((socket) => {
+//     socket.disconnect(true); // true ensures a forced disconnection
+//   });
 
+//   console.log("All clients have been disconnected.");
+// }
 
-
-
+// // Example: Call this function based on some event
+// setTimeout(() => {
+//   disconnectAllUsers(); // Disconnect all clients after 10 seconds (example)
+// }, 10000); // Change as per your requirements

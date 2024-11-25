@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import Artifact from "../../server/models/Artifact";
 import Bid from '../../server/models/bid';
 import connectToDatabase from '../../lib/mongodb';
+import axios from 'axios';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -14,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ success: false, error: 'Missing required fields.' });
   }
 
-  await connectToDatabase(); 
+  await connectToDatabase();
 
   try {
     const artifact = await Artifact.findById(auctionId).populate('bids');
@@ -41,18 +42,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     artifact.bids.push(newBid._id);
     await artifact.save();
 
-    // Emit new bid via socket.io
-    const io = req.socket.server.io; 
-    if (io) {
-      io.to(auctionId).emit('newBid', {
-        userId,
-        userName,
-        amount,
-        timestamp: new Date(),
-      });
-    }
+    await axios.post('http://localhost:5000/place-live-bid',{
+      newBid, 
+    });
 
-    return res.status(200).json({ success: true, message: 'Bid placed successfully.' });
+    return res.status(200).json({ success: true, data: newBid });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ success: false, error: 'Internal server error.' });

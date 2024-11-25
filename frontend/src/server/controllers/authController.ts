@@ -32,7 +32,6 @@ export const authenticateUser = async (email: string, password: string, name: st
                 email,
                 name,
             });
-            console.log('New user object:', newUser);
             const token = jwt.sign({ userId: newUser._id ,email, name, role: newUser.role}, JWT_SECRET_KEY, { expiresIn: '1h' });
             await newUser.save(); 
             return JSON.stringify ({token,email});

@@ -33,7 +33,6 @@ export default async function handler(
   try {
     // Connect to the database
     await connectToDatabase();
-    console.log("asdxcxxzczxvvvjvmvmvmvmvmv");
 
     // Run Multer middleware to handle file upload
     await runMiddleware(req, res, upload.single("file"));
@@ -44,11 +43,6 @@ export default async function handler(
 
     // Extract and validate the body fields
     const { name, description, startingPrice, auctionStartDate } = req.body;
-    console.log(name);
-    console.log(description);
-    console.log(startingPrice);
-    console.log(auctionStartDate);
-    console.log(req.file);
 
     if (!name || !description || !startingPrice || !auctionStartDate) {
       return res.status(400).json({ message: "All fields are required." });
@@ -90,7 +84,6 @@ export default async function handler(
       startingPrice: parsedPrice,
       auctionStartDate: parsedDate,
     });
-    console.log("newItem:" + newItem);
     await newItem.save();
 
     return res.status(201).json({

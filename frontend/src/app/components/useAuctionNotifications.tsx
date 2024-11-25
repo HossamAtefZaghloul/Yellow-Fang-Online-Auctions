@@ -8,7 +8,6 @@ const useAuctionNotifications = () => {
   useEffect(() => {
     socket.on("auction-start", () => {
       dispatch(showNotification(`Auction is starting now!`));
-    console.log('hii33123131312')
     });
 
     return () => {

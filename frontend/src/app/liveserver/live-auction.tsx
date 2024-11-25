@@ -1,10 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Clock, DollarSign, History, Info } from "lucide-react";
+import { Clock, DollarSign, History } from "lucide-react";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { RootState } from "../store";
-import socket  from "../../utils/socket";
+import io from "socket.io-client";
 
 interface AuctionData {
   _id: string;
@@ -13,6 +13,7 @@ interface AuctionData {
   startingPrice: number;
   currentBid?: number;
   auctionStatus: string;
+  image?: string;
   bids?: Array<{
     userId: string;
     userName: string;
@@ -21,28 +22,21 @@ interface AuctionData {
   }>;
 }
 
+interface BidData {
+  userId: string;
+  userName: string;
+  amount: number;
+  timestamp: string;
+}
+  const socket = io("http://localhost:5000");
+
 export default function AuctionPage() {
   const [bidAmount, setBidAmount] = useState("");
+  const [bids, setBids] = useState<BidData[]>([]);
   const [auction, setAuction] = useState<AuctionData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { userId, email } = useSelector((state: RootState) => state.auth);
-
-  useEffect(() => {
-    socket.on("newBid", (newBid) => {
-      setAuction((prev) => {
-        if (!prev) return null;
-        return {
-          ...prev,
-          bids: [newBid, ...(prev.bids || [])],
-        };
-      });
-    });
-
-    return () => {
-      socket.off("newBid");
-    };
-  }, []);
 
   useEffect(() => {
     const fetchLiveAuction = async () => {
@@ -50,7 +44,6 @@ export default function AuctionPage() {
         const response = await axios.get("/api/get_live_auction");
         if (response.data.success) {
           setAuction(response.data.data);
-
         } else {
           setError(response.data.error || "Failed to fetch live auction");
         }
@@ -65,6 +58,20 @@ export default function AuctionPage() {
     fetchLiveAuction();
   }, []);
 
+  ////////////////////////////////////////////////////////////////////////////////
+
+  useEffect(() => {
+    // Listen for live bid updates
+    socket.on("placed-live-bid", (newBid: []) => {
+      console.log("Received new live bids:", newBid);
+    });
+
+    // Cleanup the listener on component unmount
+    return () => {
+      socket.off("placed-live-bid");
+    };
+  }, []); // Empty dependency array ensures the listener is registered only once
+
   const handleBidSubmit = async (id: string) => {
     try {
       const response = await axios.post("/api/place_bid", {
@@ -74,15 +81,51 @@ export default function AuctionPage() {
         amount: parseFloat(bidAmount),
       });
 
-      if (response.data.success) {
-        setBidAmount(""); // Clear the input field
-      } else {
-        console.error("Failed to place bid:", response.data.error);
-      }
+      console.log("Bid placed successfully:", response.data);
+
+      // Clear the bid amount input field
+      setBidAmount("");
     } catch (err) {
       console.error("Error placing bid:", err);
     }
   };
+
+  useEffect(() => {
+    const fetchLiveBids = async () => {
+      try {
+        const response = await axios.get("/api/get_live_bids");
+        if (response.data.success && response.data.bids) {
+          setBids(response.data.bids);
+        } else {
+          console.log("No live bids found.");
+        }
+      } catch (err) {
+        console.error("Error fetching live bids:", err);
+      }
+    };
+
+    fetchLiveBids();
+
+    // Ensure socket connection is active
+    if (socket.connected) {
+      console.log("Socket is connected:", socket.id);
+    } else {
+      socket.connect(); // Reconnect if not already connected
+    }
+
+    // Listen for real-time updates on live bids
+    const handleNewBids = (liveBids: []) => {
+      console.log("Received new live bids:", liveBids);
+      setBids((prevBids) => [...liveBids]);
+      };
+
+    socket.on("new-live-bids", handleNewBids);
+
+    // Cleanup socket listener on component unmount
+    return () => {
+      socket.off("new-live-bids", handleNewBids);
+    };
+  }, [socket]);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
@@ -105,7 +148,7 @@ export default function AuctionPage() {
               <img
                 src={auction?.image}
                 alt={auction?.name}
-                className="w-[500px] h-[500px] rounded-lg shadow-lg"
+                className="w-auto h-auto rounded-lg shadow-lg"
               />
             </div>
 
@@ -163,16 +206,28 @@ export default function AuctionPage() {
                   <History className="h-6 w-6 mr-2 text-indigo-500" />
                   Bid History
                 </h3>
-                <ul className="list-disc list-inside space-y-2 text-gray-600">
-                  {auction?.bids?.map((bid, index) => (
-                    <li key={index}>
-                      <p className="text-sm font-medium">{bid.userName}</p>
-                      <p className="text-sm">
-                        {bid.amount} -{" "}
-                        {new Date(bid.timestamp).toLocaleString()}
-                      </p>
-                    </li>
-                  ))}
+                <ul className="divide-y divide-gray-200">
+                  {bids &&
+                    bids
+                      .slice()
+                      .reverse()
+                      .map((bid, index) => (
+                        <li key={index} className="px-6 py-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">
+                                {bid.userName}
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                {new Date(bid.timestamp).toLocaleString()}
+                              </p>
+                            </div>
+                            <p className="text-sm font-semibold text-green-600">
+                              ${bid.amount.toFixed(2)}
+                            </p>
+                          </div>
+                        </li>
+                      ))}
                 </ul>
               </div>
             </div>
