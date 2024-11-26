@@ -46,7 +46,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       newBid, 
     });
 
-    const liveBids = await Bid.find();
+    const liveBidss = await Artifact.findById(auctionId).populate('bids');
+    const liveBids= liveBidss.bids;
+
     await axios.post("http://localhost:5000/notify-live-bids", {
       liveBids,
     });

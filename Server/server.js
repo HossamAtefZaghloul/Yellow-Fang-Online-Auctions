@@ -92,7 +92,7 @@ app.post("/place-live-bid", (req, res) => {
 
 // Notify Live Bids Route
 app.post("/notify-live-bids", (req, res) => {
-  const liveBids = req.body; 
+  const liveBids = req.body.liveBids; 
 
   console.log("Received live bids:", liveBids);
 

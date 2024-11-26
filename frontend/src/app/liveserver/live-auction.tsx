@@ -23,16 +23,18 @@ interface AuctionData {
 }
 
 interface BidData {
+  _id: string;
   userId: string;
   userName: string;
   amount: number;
   timestamp: string;
 }
-  const socket = io("http://localhost:5000");
+const socket = io("http://localhost:5000");
 
 export default function AuctionPage() {
   const [bidAmount, setBidAmount] = useState("");
   const [bids, setBids] = useState<BidData[]>([]);
+  const [remainingTime, setRemainingTime] = useState(10000000);
   const [auction, setAuction] = useState<AuctionData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -58,19 +60,50 @@ export default function AuctionPage() {
     fetchLiveAuction();
   }, []);
 
+  // Timer countdown
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setRemainingTime((prev) => {
+        if (prev === 1) {
+          clearInterval(timer);
+          handleEndAuction();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [auction]);
+
+  const handleEndAuction = async () => {
+    const auctionId = auction?._id;
+    console.log(auctionId);
+    try {
+      const response = await axios.post("/api/end_auction", {
+        auctionId,
+      });
+      if (response.data.success) {
+        console.log("Auction ended due to no bids in the last minute");
+      } else {
+        console.error("Failed to end auction:", response.data.error);
+      }
+    } catch (err) {
+      console.error("Error ending auction:", err);
+    }
+  };
+
   ////////////////////////////////////////////////////////////////////////////////
 
   useEffect(() => {
-    // Listen for live bid updates
     socket.on("placed-live-bid", (newBid: []) => {
       console.log("Received new live bids:", newBid);
     });
 
-    // Cleanup the listener on component unmount
     return () => {
       socket.off("placed-live-bid");
     };
-  }, []); // Empty dependency array ensures the listener is registered only once
+  }, []);
 
   const handleBidSubmit = async (id: string) => {
     try {
@@ -92,9 +125,14 @@ export default function AuctionPage() {
 
   useEffect(() => {
     const fetchLiveBids = async () => {
+      const auctionId = auction?._id;
+      console.log(auctionId);
       try {
-        const response = await axios.get("/api/get_live_bids");
+        const response = await axios.get("/api/get_live_bids", {
+          params: { auctionId }, 
+        });
         if (response.data.success && response.data.bids) {
+          console.log(response.data.bids);
           setBids(response.data.bids);
         } else {
           console.log("No live bids found.");
@@ -105,22 +143,32 @@ export default function AuctionPage() {
     };
 
     fetchLiveBids();
-
-  }, []);
-
+  }, [auction]);
 
   useEffect(() => {
-    socket.on("new-live-bids", (liveBids: BidData) => {
-      console.log('dsfsdfsdfdsf');
-      console.log(liveBids);
-      setBids((prevBids) => [...prevBids, liveBids]);
+    socket.on("new-live-bids", (data: BidData[]) => {
+      console.log("New live bids received:", data);
+
+      if (Array.isArray(data)) {
+        setBids((prevBids) => {
+          const combinedBids = [...prevBids, ...data];
+          const uniqueBids = Array.from(
+            new Map(combinedBids.map((bid) => [bid._id, bid])).values()
+          );
+
+          setRemainingTime(100000000);
+
+          return uniqueBids;
+        });
+      } else {
+        console.error("Invalid data format received:", data);
+      }
     });
-   
+
     return () => {
       socket.off("new-live-bids");
     };
   }, []);
-  
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
@@ -161,12 +209,12 @@ export default function AuctionPage() {
                   <div className="flex items-center">
                     <DollarSign className="h-6 w-6 text-green-500 mr-2" />
                     <span className="text-2xl font-bold text-gray-900">
-                      {auction?.currentBid || auction?.startingPrice}
+                      {auction?.startingPrice}
                     </span>
                   </div>
                   <div className="flex items-center text-gray-500">
                     <Clock className="h-5 w-5 mr-1" />
-                    <span>2h 15m left</span>
+                    <span>{remainingTime}s left</span>
                   </div>
                 </div>
 
@@ -201,11 +249,12 @@ export default function AuctionPage() {
                   <History className="h-6 w-6 mr-2 text-indigo-500" />
                   Bid History
                 </h3>
-                <ul className="divide-y divide-gray-200">
-                  {bids && auction &&
+                <ul className="divide-y divide-gray-200 max-h-96 overflow-y-auto">
+                  {bids &&
+                    auction &&
                     bids
-                      .slice()
-                      .reverse()
+                      .slice() // Get the last 10 bids
+                      .reverse() // Reverse to display the most recent one at the top
                       .map((bid, index) => (
                         <li key={index} className="px-6 py-4">
                           <div className="flex items-center justify-between">
@@ -214,11 +263,19 @@ export default function AuctionPage() {
                                 {bid.userName}
                               </p>
                               <p className="text-sm text-gray-500">
-                                {new Date(bid.timestamp).toLocaleString()}
+                                {new Date(bid.timestamp).toLocaleTimeString(
+                                  "en-US"
+                                )}
                               </p>
                             </div>
-                            <p className="text-sm font-semibold text-green-600">
-                            ${bid.amount ? bid.amount.toFixed(2) : '0.00'}
+                            <p
+                              className={`text-sm font-semibold ${
+                                index === 0
+                                  ? "text-yellow-500" // Golden color for the most recent bid
+                                  : "text-green-600" // Green color for others
+                              }`}
+                            >
+                              ${bid.amount ? bid.amount.toFixed(1) : "0.00"}
                             </p>
                           </div>
                         </li>
