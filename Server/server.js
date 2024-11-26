@@ -8,7 +8,6 @@ import fs from 'fs';
 import http from 'http';
 import { fileURLToPath } from 'url';
 import jwt from 'jsonwebtoken';
-import { createClient } from 'redis';
 import { Server } from 'socket.io';
 import Redis from 'ioredis';
 import axios from 'axios';
@@ -93,7 +92,7 @@ app.post("/place-live-bid", (req, res) => {
 
 // Notify Live Bids Route
 app.post("/notify-live-bids", (req, res) => {
-  const liveBids = req.body.liveBids; 
+  const liveBids = req.body; 
 
   console.log("Received live bids:", liveBids);
 

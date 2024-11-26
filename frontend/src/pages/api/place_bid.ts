@@ -46,7 +46,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       newBid, 
     });
 
+    const liveBids = await Bid.find();
+    await axios.post("http://localhost:5000/notify-live-bids", {
+      liveBids,
+    });
+
     return res.status(200).json({ success: true, data: newBid });
+
   } catch (err) {
     console.error(err);
     return res.status(500).json({ success: false, error: 'Internal server error.' });

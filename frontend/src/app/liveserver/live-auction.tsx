@@ -106,26 +106,21 @@ export default function AuctionPage() {
 
     fetchLiveBids();
 
-    // Ensure socket connection is active
-    if (socket.connected) {
-      console.log("Socket is connected:", socket.id);
-    } else {
-      socket.connect(); // Reconnect if not already connected
-    }
+  }, []);
 
-    // Listen for real-time updates on live bids
-    const handleNewBids = (liveBids: []) => {
-      console.log("Received new live bids:", liveBids);
-      setBids((prevBids) => [...liveBids]);
-      };
 
-    socket.on("new-live-bids", handleNewBids);
-
-    // Cleanup socket listener on component unmount
+  useEffect(() => {
+    socket.on("new-live-bids", (liveBids: BidData) => {
+      console.log('dsfsdfsdfdsf');
+      console.log(liveBids);
+      setBids((prevBids) => [...prevBids, liveBids]);
+    });
+   
     return () => {
-      socket.off("new-live-bids", handleNewBids);
+      socket.off("new-live-bids");
     };
-  }, [socket]);
+  }, []);
+  
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
@@ -207,7 +202,7 @@ export default function AuctionPage() {
                   Bid History
                 </h3>
                 <ul className="divide-y divide-gray-200">
-                  {bids &&
+                  {bids && auction &&
                     bids
                       .slice()
                       .reverse()
@@ -223,7 +218,7 @@ export default function AuctionPage() {
                               </p>
                             </div>
                             <p className="text-sm font-semibold text-green-600">
-                              ${bid.amount.toFixed(2)}
+                            ${bid.amount ? bid.amount.toFixed(2) : '0.00'}
                             </p>
                           </div>
                         </li>
