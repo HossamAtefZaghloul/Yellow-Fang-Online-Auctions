@@ -99,7 +99,7 @@ export default function LoginPage() {
   });
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center opacity-1  bg-[url('/123.jpg')] bg-cover">
+    <div className="min-h-screen flex flex-col items-center justify-center opacity-1  bg-[url('/LoginWP.jpg')] bg-cover">
       <Link
         href="/"
         className="absolute left-4 top-4 md:left-8 md:top-8 flex items-center text-gray-600 hover:text-gray-900"

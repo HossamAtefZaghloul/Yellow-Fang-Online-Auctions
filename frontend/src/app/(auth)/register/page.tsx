@@ -36,7 +36,7 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center opacity-1 bg-[url('/123.jpg')] bg-cover">
+        <div className="min-h-screen flex flex-col items-center justify-center opacity-1 bg-[url('/LoginWP.jpg')] bg-cover">
             <Link href="/" className="absolute left-4 top-4 md:left-8 md:top-8 flex items-center text-gray-600 hover:text-gray-900">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-4 w-4">
                     <path d="M15 18l-6-6 6-6" />

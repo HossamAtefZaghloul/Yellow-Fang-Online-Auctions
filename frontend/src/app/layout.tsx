@@ -9,7 +9,7 @@ import ReduxProvider from './components/ReduxProvider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Mystery Museum',
+  title: 'Yellow-Fang-Auctions',
   description: 'Showcase of paintings and artifacts',
   icons: '/2.png',
 };
