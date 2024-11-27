@@ -5,7 +5,6 @@ import { Star, Calendar, Clock, DollarSign } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { showNotification } from "../store/notificationSlice";
 
 interface Artifact {
   _id: number;
@@ -67,8 +66,7 @@ const StarArtifact = ({ artifact }: { artifact: Artifact }) => {
           <span>{new Date(artifact.auctionStartDate).toLocaleString()}</span>
         </div>
         <div className="flex items-center">
-          <DollarSign className="w-5 h-5 mr-2" />
-          <span>Starting at ${artifact.startingPrice.toLocaleString()}</span>
+          <span>Starting with ${artifact.startingPrice.toLocaleString()}</span>
         </div>
       </div>
       <div className="flex items-center text-lg font-semibold">
@@ -95,7 +93,7 @@ const ArtifactCard = ({ artifact }: { artifact: Artifact }) => (
       </div>
       <div className="flex items-center">
         <DollarSign className="w-4 h-4 mr-1" />
-        <span>${artifact.startingPrice.toLocaleString()}</span>
+        <span>{artifact.startingPrice.toLocaleString()}</span>
       </div>
     </div>
   </div>

@@ -34,7 +34,7 @@ const socket = io("http://localhost:5000");
 export default function AuctionPage() {
   const [bidAmount, setBidAmount] = useState("");
   const [bids, setBids] = useState<BidData[]>([]);
-  const [remainingTime, setRemainingTime] = useState(10000000);
+  const [remainingTime, setRemainingTime] = useState(120);
   const [auction, setAuction] = useState<AuctionData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -129,7 +129,7 @@ export default function AuctionPage() {
       console.log(auctionId);
       try {
         const response = await axios.get("/api/get_live_bids", {
-          params: { auctionId }, 
+          params: { auctionId },
         });
         if (response.data.success && response.data.bids) {
           console.log(response.data.bids);
@@ -156,10 +156,9 @@ export default function AuctionPage() {
             new Map(combinedBids.map((bid) => [bid._id, bid])).values()
           );
 
-          setRemainingTime(100000000);
-
           return uniqueBids;
         });
+        setRemainingTime(5);
       } else {
         console.error("Invalid data format received:", data);
       }
